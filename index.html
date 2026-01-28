@@ -3,244 +3,278 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LAVMIS Data Collector Module</title>
-    
+    <title>LAVMIS Pro | Ultimate Offline Audit</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    
     <style>
-        :root { --sidebar-width: 420px; --primary: #1a252f; --accent: #3498db; --success: #27ae60; --warning: #f1c40f; --danger: #e74c3c; --valuation: #f39c12; --panel-bg: #2c3e50; }
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: 'Segoe UI', sans-serif; overflow: hidden; display: flex; }
-        #sidebar { width: var(--sidebar-width); background: var(--primary); color: white; padding: 15px; overflow-y: auto; z-index: 2000; box-shadow: 4px 0 15px rgba(0,0,0,0.3); }
+        :root { --primary: #1a252f; --accent: #3498db; --success: #27ae60; --warning: #f39c12; --danger: #e74c3c; --text: #ecf0f1; }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: 'Segoe UI', sans-serif; display: flex; overflow: hidden; background: #111; }
+        
+        /* Sidebar Styling */
+        #sidebar { width: 450px; background: var(--primary); color: var(--text); padding: 15px; overflow-y: auto; z-index: 2000; border-right: 2px solid #34495e; box-shadow: 5px 0 20px rgba(0,0,0,0.5); }
         #map { flex-grow: 1; height: 100%; z-index: 1; background: #222; }
         
-        @media (max-width: 768px) {
-            body { flex-direction: column; }
-            #sidebar { width: 100%; height: 55%; order: 2; border-top: 3px solid var(--accent); }
-            #map { height: 45%; order: 1; }
-        }
+        /* Indicators */
+        .status-container { display: flex; gap: 8px; margin-bottom: 12px; }
+        .status-box { flex: 1; padding: 8px; border-radius: 6px; text-align: center; font-size: 0.7rem; font-weight: bold; background: #2c3e50; border: 1px solid #3e5871; text-transform: uppercase; }
+        .good { color: var(--success); border-color: var(--success); }
+        .bad { color: var(--danger); border-color: var(--danger); }
+        .warn { color: var(--warning); border-color: var(--warning); }
 
-        .panel { background: var(--panel-bg); border-radius: 8px; padding: 12px; margin-bottom: 12px; border-top: 4px solid var(--accent); }
-        .mode-tabs { display: flex; gap: 4px; margin-bottom: 10px; background: #1a252f; padding: 4px; border-radius: 8px; }
-        .tab-btn { padding: 8px; font-size: 0.75rem; background: transparent; border: none; flex: 1; color: #bdc3c7; cursor: pointer; transition: 0.2s; }
-        .tab-btn.active { background: var(--valuation); color: #1a252f; border-radius: 6px; font-weight: bold; }
-
-        .accuracy-pill { display: flex; justify-content: space-between; align-items: center; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-weight: bold; }
-        .acc-red { background: rgba(231, 76, 60, 0.2); color: #ff7675; border: 1px solid var(--danger); }
-        .acc-yellow { background: rgba(241, 196, 15, 0.2); color: var(--warning); border: 1px solid var(--warning); }
-        .acc-green { background: rgba(39, 174, 96, 0.2); color: #55efc4; border: 1px solid var(--success); }
+        .panel { background: #2c3e50; border-radius: 8px; padding: 12px; margin-bottom: 12px; border-top: 3px solid var(--accent); position: relative; }
         
-        input, select, textarea, button { width: 100%; padding: 10px; margin-bottom: 8px; border-radius: 6px; border: none; font-size: 0.9rem; box-sizing: border-box; }
-        label { font-size: 0.75rem; color: #bdc3c7; margin-bottom: 4px; display: block; }
-        button { background: var(--accent); color: white; font-weight: 600; cursor: pointer; }
-        
-        .table-container { background: #1a252f; border-radius: 6px; overflow-x: auto; max-height: 120px; font-size: 0.75rem; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #2c3e50; }
+        /* Strict Lock UI */
+        .locked-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 100; border-radius: 8px; color: white; font-weight: bold; text-align: center; font-size: 0.85rem; padding: 10px; box-sizing: border-box; transition: 0.3s; pointer-events: none; opacity: 0; }
+        .panel.locked .locked-overlay { opacity: 1; pointer-events: all; }
 
-        .coord-box { background: #f0f0f0; padding: 5px; border-radius: 4px; border: 1px solid #ccc; margin: 8px 0; font-family: monospace; font-size: 11px; color: #444; }
-        .doc-link { color: var(--accent); text-decoration: none; font-weight: bold; display: block; margin-top: 5px; }
+        input, select, textarea { width: 100%; padding: 10px; margin: 4px 0; border-radius: 4px; border: 1px solid #34495e; background: #1a252f; color: white; box-sizing: border-box; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        
+        button { cursor: pointer; font-weight: bold; border: none; padding: 12px; border-radius: 4px; width: 100%; margin-top: 5px; transition: 0.2s; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-nav { background: #8e44ad; color: white; font-size: 0.75rem; }
+        .btn-manual { background: #5d6d7e; color: white; font-size: 0.7rem; }
+
+        /* Log / Export */
+        .data-log { background: #161d24; border-radius: 6px; max-height: 200px; overflow-y: auto; margin-top: 10px; border: 1px solid #2c3e50; }
+        .log-item { padding: 8px 12px; border-bottom: 1px solid #2c3e50; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .log-item:hover { background: #1c2833; }
+
+        @media (max-width: 768px) { body { flex-direction: column; } #sidebar { width: 100%; height: 60%; } #map { height: 40%; } }
     </style>
 </head>
 <body>
 
 <div id="sidebar">
-    <h2 style="text-align:center; color: var(--valuation);"><i class="fa-solid fa-database"></i> LAVMIS MODULE</h2>
+    <h2 style="margin:0 0 10px 0; color:var(--warning); letter-spacing: 1px;">LAVMIS PRO</h2>
     
-    <div class="panel">
-        <h3>1. Location Method</h3>
-        <div class="mode-tabs">
-            <button class="tab-btn active" id="tab-live" onclick="setMode('live')">Live GPS</button>
-            <button class="tab-btn" id="tab-map" onclick="setMode('map')">Map Pin</button>
-            <button class="tab-btn" id="tab-coords" onclick="setMode('coords')">Manual</button>
-        </div>
-        <div id="live-panel">
-            <div id="accDisplay" class="accuracy-pill acc-red">
-                <span>Signal Accuracy:</span><span id="acc-val">Searching...</span>
-            </div>
-        </div>
-        <div id="coord-panel" style="display: none; flex-direction: column;">
-            <div style="display: flex; gap: 5px;">
-                <input type="number" id="manual-lat" placeholder="Latitude" step="any">
-                <input type="number" id="manual-lng" placeholder="Longitude" step="any">
-            </div>
-            <button onclick="setManualCoords()" style="background: var(--valuation); color: #1a252f;">Plot Point</button>
-        </div>
+    <div class="status-container">
+        <div id="gps-status" class="status-box bad">GPS: NO FIX</div>
+        <div id="net-status" class="status-box bad">OFFLINE</div>
     </div>
 
     <div class="panel">
-        <h3>2. Audit Details</h3>
-        <div style="display: flex; gap: 5px;">
-            <input type="number" id="price" placeholder="Total Price ($)">
-            <input type="number" id="size" placeholder="Area Size (Ha)">
+        <div class="grid-2">
+            <button id="followBtn" onclick="toggleFollow()" class="btn-nav"><i class="fa-solid fa-person-walking"></i> FOLLOW: ON</button>
+            <button onclick="seedSatellite()" style="background:var(--warning); color:#000; font-size:0.7rem;">CACHE AREA</button>
+        </div>
+        <div id="cache-info" style="font-size: 0.6rem; color: var(--success); text-align: center; margin-top: 5px; display: none;">Caching tiles... <span id="p-val">0</span>%</div>
+    </div>
+
+    <div id="capturePanel" class="panel locked">
+        <div class="locked-overlay" id="lockMsg">WAITING FOR STABLE GPS<br>(3m - 15m)</div>
+        
+        <input type="text" id="propId" placeholder="Property ID / Name">
+        <div class="grid-2">
+            <input type="text" id="blk" placeholder="Block No.">
+            <input type="text" id="plt" placeholder="Plot No.">
         </div>
         <select id="landUse">
-            <option value="Residential">Residential</option>
-            <option value="Commercial">Commercial</option>
-            <option value="Agricultural">Agricultural</option>
-            <option value="Industrial">Industrial</option>
+            <option>Residential</option><option>Commercial</option><option>Agricultural</option><option>Industrial</option>
         </select>
-        <textarea id="description" placeholder="Property Description (Optional)" rows="2"></textarea>
-        <label>Sales Agreement (Optional)</label>
-        <input type="file" id="agreementFile">
-        
-        <button id="submitBtn" onclick="saveEntry()" style="background: var(--success);" disabled>
-            <i class="fa-solid fa-save"></i> Save Entry
-        </button>
+        <textarea id="desc" rows="2" placeholder="Property Description..."></textarea>
+        <div class="grid-2">
+            <input type="number" id="price" placeholder="Price ($)">
+            <input type="number" id="size" placeholder="Size (Ha)">
+        </div>
+        <input type="file" id="photo" accept="image/*" capture="environment">
+        <button onclick="saveRecord()" class="btn-success">SAVE PROPERTY DATA</button>
     </div>
 
     <div class="panel">
-        <div class="table-container">
-            <table id="valTable">
-                <thead><tr><th>Use</th><th>Rate/Ha</th><th>Preview</th></tr></thead>
-                <tbody></tbody>
-            </table>
-        </div>
-        <button onclick="exportData()" style="margin-top:10px; background:#27ae60;">
-            <i class="fa-solid fa-file-excel"></i> Export Excel (Incl. Coordinates)
-        </button>
+        <button onclick="enableManualMode()" class="btn-manual"><i class="fa-solid fa-hand-pointer"></i> MANUAL MAP PICKER (BACKUP)</button>
+        <div id="manual-coords" style="font-size:0.65rem; color:#7f8c8d; margin-top:5px; text-align:center;">GPS Locked to Satellite</div>
     </div>
+
+    <div class="data-log" id="dataLog"></div>
+    <button onclick="exportExcel()" style="background:#27ae60; color:white; margin-top:10px;"><i class="fa-solid fa-file-excel"></i> EXPORT TO EXCEL</button>
 </div>
 
 <div id="map"></div>
 
-
-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/pouchdb@8.0.1/dist/pouchdb.min.js"></script>
+<script src="https://unpkg.com/leaflet.tilelayer.pouchdbcached@1.0.0/L.TileLayer.PouchDBCached.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
 
 <script>
-    const map = L.map('map', { zoomControl: false }).setView([0,0], 2);
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
-    
-    const activeLayer = L.layerGroup().addTo(map);
+    // 1. INITIALIZATION
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+
+    const map = L.map('map', { zoomControl: false, maxZoom: 18 }).setView([0,0], 2);
     const savedLayer = L.featureGroup().addTo(map);
-    
-    let currentMarker = null;
-    let currentMode = 'live';
-    let watchId = null;
+    const liveLayer = L.layerGroup().addTo(map);
 
-    function setMode(mode) {
-        currentMode = mode;
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.getElementById(`tab-${mode}`).classList.add('active');
-        document.getElementById('live-panel').style.display = mode === 'live' ? 'block' : 'none';
-        document.getElementById('coord-panel').style.display = mode === 'coords' ? 'flex' : 'none';
-        if (mode === 'live') triggerAutoGPS();
-        else {
-            if (watchId) navigator.geolocation.clearWatch(watchId);
-            document.getElementById('submitBtn').disabled = false;
+    const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        useCache: true, crossOrigin: true, cacheMaxAge: 1209600000 
+    }).addTo(map);
+
+    // 2. STATE VARIABLES
+    let currentPos = null;
+    let manualPos = null;
+    let isManualMode = false;
+    let isFollowing = true;
+    let isFirstFix = true;
+
+    // 3. GPS ACCURACY & AUTO-PAN ENGINE
+    navigator.geolocation.watchPosition(pos => {
+        currentPos = pos;
+        const { latitude, longitude, accuracy } = pos.coords;
+        const gpsStatus = document.getElementById('gps-status');
+        const capturePanel = document.getElementById('capturePanel');
+        
+        gpsStatus.innerText = `GPS: ${accuracy.toFixed(1)}m`;
+
+        // Pan Logic
+        if (isFirstFix && accuracy <= 25) {
+            map.flyTo([latitude, longitude], 17);
+            isFirstFix = false;
+        } else if (isFollowing) {
+            map.panTo([latitude, longitude]);
         }
-    }
 
-    function triggerAutoGPS() {
-        if (watchId) navigator.geolocation.clearWatch(watchId);
-        watchId = navigator.geolocation.watchPosition((pos) => {
-            if (currentMode !== 'live') return;
-            updateUI([pos.coords.latitude, pos.coords.longitude], pos.coords.accuracy);
-        }, (err) => console.error(err), { enableHighAccuracy: true });
-    }
-
-    function updateUI(latlng, accuracy) {
-        document.getElementById('acc-val').innerText = accuracy.toFixed(1) + "m";
-        const accDisplay = document.getElementById('accDisplay');
-        const submitBtn = document.getElementById('submitBtn');
-        accDisplay.className = "accuracy-pill " + (accuracy <= 3 ? "acc-green" : (accuracy <= 15 ? "acc-yellow" : "acc-red"));
-        submitBtn.disabled = accuracy > 15;
-        updateActiveMarker(latlng);
-        map.setView(latlng, 18);
-    }
-
-    function setManualCoords() {
-        const lat = parseFloat(document.getElementById('manual-lat').value);
-        const lng = parseFloat(document.getElementById('manual-lng').value);
-        if (!isNaN(lat) && !isNaN(lng)) {
-            updateActiveMarker([lat, lng]);
-            map.setView([lat, lng], 17);
+        // Strict Gate: Unlock only if accuracy is 3m - 15m (or manual backup active)
+        if (isManualMode || (accuracy <= 15)) {
+            gpsStatus.className = "status-box good";
+            capturePanel.classList.remove('locked');
+        } else {
+            gpsStatus.className = "status-box warn";
+            capturePanel.classList.add('locked');
+            document.getElementById('lockMsg').innerHTML = `ACCURACY POOR (${accuracy.toFixed(0)}m)<br>WAIT FOR < 15m SIGNAL`;
         }
+
+        liveLayer.clearLayers();
+        L.circleMarker([latitude, longitude], {
+            radius: 8, color: '#fff', fillColor: '#3498db', fillOpacity: 1, weight: 3
+        }).addTo(liveLayer);
+
+    }, err => console.warn(err), { enableHighAccuracy: true, maximumAge: 1000 });
+
+    // 4. OFFLINE TILE SEEDING
+    function seedSatellite() {
+        if (map.getZoom() < 15) return alert("Zoom in to the property area (Level 15+) before caching!");
+        document.getElementById('cache-info').style.display = 'block';
+        satellite.seed(map.getBounds(), map.getZoom(), map.getZoom() + 1);
+    }
+    satellite.on('seedprogress', e => {
+        document.getElementById('p-val').innerText = Math.floor((e.downloaded / e.remaining) * 100);
+    });
+    satellite.on('seedend', () => {
+        alert("Success: Satellite area is now stored on this device.");
+        document.getElementById('cache-info').style.display = 'none';
+    });
+
+    // 5. NAVIGATION CONTROLS
+    function toggleFollow() {
+        isFollowing = !isFollowing;
+        const btn = document.getElementById('followBtn');
+        btn.innerHTML = isFollowing ? '<i class="fa-solid fa-person-walking"></i> FOLLOW: ON' : '<i class="fa-solid fa-hand"></i> FOLLOW: OFF';
+        btn.style.background = isFollowing ? "#8e44ad" : "#34495e";
     }
 
-    map.on('click', (e) => { if (currentMode === 'map') updateActiveMarker(e.latlng); });
+    map.on('movestart', (e) => { 
+        if (!e.hard && isFollowing) toggleFollow(); 
+    });
 
-    function updateActiveMarker(latlng) {
-        activeLayer.clearLayers();
-        currentMarker = L.circleMarker(latlng, { radius: 12, color: '#fff', fillColor: '#3498db', fillOpacity: 0.8, weight: 3 }).addTo(activeLayer);
+    function enableManualMode() {
+        isManualMode = true;
+        document.getElementById('capturePanel').classList.remove('locked');
+        document.getElementById('manual-coords').innerText = "TAP MAP TO SET POINT";
+        document.getElementById('manual-coords').style.color = "var(--warning)";
+        map.getContainer().style.cursor = "crosshair";
     }
 
-    function saveEntry() {
-        const p = document.getElementById('price').value;
-        const s = document.getElementById('size').value;
-        const u = document.getElementById('landUse').value;
-        const desc = document.getElementById('description').value || "N/A";
-        const fileInput = document.getElementById('agreementFile');
-        const fileName = fileInput.files[0] ? fileInput.files[0].name : "None";
-        const fileUrl = fileInput.files[0] ? URL.createObjectURL(fileInput.files[0]) : null;
+    map.on('click', e => {
+        if (!isManualMode) return;
+        manualPos = e.latlng;
+        document.getElementById('manual-coords').innerText = `Set: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`;
+        map.getContainer().style.cursor = "";
+    });
 
-        if (!p || !s || !currentMarker) return alert("Incomplete data.");
+    // 6. DATA & EXPORT
+    async function saveRecord() {
+        const lat = manualPos ? manualPos.lat : currentPos.coords.latitude;
+        const lng = manualPos ? manualPos.lng : currentPos.coords.longitude;
+        
+        const photoFile = document.getElementById('photo').files[0];
+        let photoData = "";
+        if (photoFile) {
+            photoData = await new Promise(r => {
+                const reader = new FileReader();
+                reader.onload = () => r(reader.result);
+                reader.readAsDataURL(photoFile);
+            });
+        }
 
-        const coords = currentMarker.getLatLng();
-        const rate = (p / s).toFixed(0);
-
-        const entry = {
-            Date: new Date().toLocaleDateString(),
-            LandUse: u,
-            Total_Price: p,
-            Area_Ha: s,
-            Rate_Per_Ha: rate,
-            Latitude: coords.lat.toFixed(6),
-            Longitude: coords.lng.toFixed(6),
-            Description: desc,
-            Attached_Doc: fileName,
-            internalBlob: fileUrl // Hidden from excel export
+        const record = {
+            uid: Date.now(),
+            pId: document.getElementById('propId').value || "Unnamed",
+            block: document.getElementById('blk').value,
+            plot: document.getElementById('plt').value,
+            use: document.getElementById('landUse').value,
+            desc: document.getElementById('desc').value,
+            price: document.getElementById('price').value,
+            size: document.getElementById('size').value,
+            rate: (document.getElementById('price').value / document.getElementById('size').value).toFixed(2),
+            lat: lat.toFixed(6), lng: lng.toFixed(6),
+            acc: manualPos ? "Manual" : currentPos.coords.accuracy.toFixed(1) + "m",
+            time: new Date().toLocaleString()
         };
 
-        const marker = L.marker([entry.Latitude, entry.Longitude]).addTo(savedLayer);
-        marker.bindPopup(`
-            <div style="min-width:180px">
-                <b style="color:var(--valuation)">${u.toUpperCase()}</b><br>
-                <b>Total:</b> $${Number(p).toLocaleString()}<br>
-                <b>Size:</b> ${s} Ha<br>
-                <b>Rate:</b> $${Number(rate).toLocaleString()}/Ha<br>
-                <div class="coord-box">${entry.Latitude}, ${entry.Longitude}</div>
-                ${fileUrl ? `<a href="${fileUrl}" target="_blank" class="doc-link">View Document</a>` : ''}
-            </div>
-        `);
-
-        let data = JSON.parse(localStorage.getItem('lavmis_db') || '[]');
-        data.push(entry);
-        localStorage.setItem('lavmis_db', JSON.stringify(data));
-        loadTable();
+        const db = JSON.parse(localStorage.getItem('lavmis_db') || '[]');
+        db.push(record);
+        localStorage.setItem('lavmis_db', JSON.stringify(db));
         
-        document.getElementById('price').value = "";
-        document.getElementById('size').value = "";
-        document.getElementById('description').value = "";
-        document.getElementById('agreementFile').value = "";
+        // Reset manual mode
+        isManualMode = false; manualPos = null;
+        document.getElementById('manual-coords').innerText = "GPS Locked to Satellite";
+        document.getElementById('manual-coords').style.color = "";
+        
+        refreshUI();
+        alert("Property successfully logged!");
     }
 
-    function loadTable() {
-        const tbody = document.querySelector("#valTable tbody");
-        tbody.innerHTML = "";
-        let data = JSON.parse(localStorage.getItem('lavmis_db') || '[]');
-        data.reverse().forEach(item => {
-            const row = tbody.insertRow();
-            row.innerHTML = `<td>${item.LandUse}</td><td>$${Number(item.Rate_Per_Ha).toLocaleString()}</td><td><button onclick="map.setView([${item.Latitude}, ${item.Longitude}], 18)">Find</button></td>`;
+    function refreshUI() {
+        const log = document.getElementById('dataLog');
+        log.innerHTML = "";
+        savedLayer.clearLayers();
+        const db = JSON.parse(localStorage.getItem('lavmis_db') || '[]');
+
+        db.forEach(item => {
+            L.marker([item.lat, item.lng]).addTo(savedLayer)
+                .bindPopup(`
+                    <div style="min-width:200px">
+                        <h4 style="margin:0">${item.pId}</h4>
+                        <hr>
+                        Blk/Plt: ${item.block}/${item.plot}<br>
+                        Valuation: $${item.price} ($${item.rate}/Ha)<br>
+                        GPS Accuracy: ${item.acc}<br>
+                        ${item.photo ? `<img src="${item.photo}" style="width:100%; margin-top:10px; border-radius:4px;">` : ''}
+                    </div>
+                `);
+
+            const div = document.createElement('div');
+            div.className = 'log-item';
+            div.innerHTML = `<span><b>${item.pId}</b><br><small>${item.use} | ${item.time}</small></span><i class="fa-solid fa-location-dot"></i>`;
+            div.onclick = () => { isFollowing = false; map.flyTo([item.lat, item.lng], 18); };
+            log.appendChild(div);
         });
     }
 
-    function exportData() {
-        let data = JSON.parse(localStorage.getItem('lavmis_db') || '[]');
-        if (data.length === 0) return alert("No data.");
-        
-        // Remove internal properties before Excel generation
-        const cleanData = data.map(({internalBlob, ...rest}) => rest);
-        
-        const ws = XLSX.utils.json_to_sheet(cleanData);
+    function exportExcel() {
+        const data = JSON.parse(localStorage.getItem('lavmis_db') || '[]');
+        if (data.length === 0) return alert("No data to export.");
+        const clean = data.map(({photo, uid, ...rest}) => rest);
+        const ws = XLSX.utils.json_to_sheet(clean);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "LAVMIS Export");
-        XLSX.writeFile(wb, "LAVMIS_Field_Audit_With_Coordinates.xlsx");
+        XLSX.utils.book_append_sheet(wb, ws, "AuditData");
+        XLSX.writeFile(wb, `LAVMIS_Audit_${new Date().getTime()}.xlsx`);
     }
 
-    window.onload = () => { triggerAutoGPS(); loadTable(); };
+    window.addEventListener('online',  () => { document.getElementById('net-status').innerText = "ONLINE"; document.getElementById('net-status').className = "status-box good"; });
+    window.addEventListener('offline', () => { document.getElementById('net-status').innerText = "OFFLINE"; document.getElementById('net-status').className = "status-box warn"; });
+    
+    window.onload = refreshUI;
 </script>
 </body>
 </html>
