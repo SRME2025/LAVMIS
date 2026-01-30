@@ -3,95 +3,789 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LAVMIS Pro | Field Valuation Suite</title>
+    <title>LAVMIS Pro | Offline Satellite</title>
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
     <style>
-        :root { --primary: #1a252f; --accent: #3498db; --success: #27ae60; --warning: #f39c12; --danger: #e74c3c; --text: #ecf0f1; }
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: 'Segoe UI', sans-serif; display: flex; overflow: hidden; background: #111; }
+        :root { 
+            --sidebar-width: 480px; 
+            --primary: #1a252f; 
+            --accent: #3498db; 
+            --success: #27ae60; 
+            --valuation: #f39c12; 
+            --panel-bg: #2c3e50; 
+            --warning: #e74c3c;
+        }
         
-        #sidebar { width: 450px; background: var(--primary); color: var(--text); padding: 15px; overflow-y: auto; z-index: 2000; border-right: 2px solid #34495e; box-shadow: 5px 0 20px rgba(0,0,0,0.5); }
-        #map { flex-grow: 1; height: 100%; z-index: 1; background: #222; }
+        body, html { 
+            margin: 0; 
+            padding: 0; 
+            height: 100%; 
+            width: 100%; 
+            font-family: 'Segoe UI', sans-serif; 
+            overflow: hidden; 
+            display: flex; 
+        }
         
-        .status-container { display: flex; gap: 8px; margin-bottom: 12px; }
-        .status-box { flex: 1; padding: 8px; border-radius: 6px; text-align: center; font-size: 0.7rem; font-weight: bold; background: #2c3e50; border: 1px solid #3e5871; text-transform: uppercase; }
-        .good { color: var(--success); border-color: var(--success); }
-        .bad { color: var(--danger); border-color: var(--danger); }
-        .warn { color: var(--warning); border-color: var(--warning); }
-
-        .panel { background: #2c3e50; border-radius: 8px; padding: 12px; margin-bottom: 12px; border-top: 3px solid var(--accent); position: relative; }
+        #sidebar { 
+            width: var(--sidebar-width); 
+            background: var(--primary); 
+            color: white; 
+            padding: 15px; 
+            overflow-y: auto; 
+            z-index: 2000; 
+            display: flex;
+            flex-direction: column;
+        }
         
-        .locked-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 100; border-radius: 8px; color: white; font-weight: bold; text-align: center; font-size: 0.85rem; padding: 10px; box-sizing: border-box; transition: 0.3s; pointer-events: none; opacity: 0; }
-        .panel.locked .locked-overlay { opacity: 1; pointer-events: all; }
-
-        input, select, textarea { width: 100%; padding: 10px; margin: 4px 0; border-radius: 4px; border: 1px solid #34495e; background: #1a252f; color: white; box-sizing: border-box; font-size: 0.9rem; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        #map { 
+            flex-grow: 1; 
+            height: 100%; 
+            z-index: 1; 
+            background: #222; 
+            cursor: crosshair;
+        }
         
-        button { cursor: pointer; font-weight: bold; border: none; padding: 12px; border-radius: 4px; width: 100%; margin-top: 5px; transition: 0.2s; }
-        .btn-success { background: var(--success); color: white; }
-        .btn-nav { background: #8e44ad; color: white; font-size: 0.75rem; }
-        .btn-manual { background: #5d6d7e; color: white; font-size: 0.7rem; }
+        .status-bar { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 15px; 
+        }
+        
+        .indicator { 
+            padding: 4px 10px; 
+            border-radius: 12px; 
+            font-size: 0.7rem; 
+            font-weight: bold; 
+        }
+        
+        .on { background: var(--success); }
+        .off { background: var(--warning); }
+        .warning-ind { background: #f39c12; }
 
-        .data-log { background: #161d24; border-radius: 6px; max-height: 250px; overflow-y: auto; margin-top: 10px; border: 1px solid #2c3e50; }
-        .log-item { padding: 10px 12px; border-bottom: 1px solid #2c3e50; font-size: 0.8rem; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .log-item:hover { background: #1c2833; }
-        .log-item b { color: var(--warning); }
-
-        @media (max-width: 768px) { body { flex-direction: column; } #sidebar { width: 100%; height: 65%; } #map { height: 35%; } }
+        .panel { 
+            background: var(--panel-bg); 
+            border-radius: 8px; 
+            padding: 12px; 
+            margin-bottom: 12px; 
+            border-top: 4px solid var(--accent); 
+        }
+        
+        .cache-controls { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 8px; 
+            margin-top: 10px; 
+        }
+        
+        button { 
+            background: var(--accent); 
+            color: white; 
+            border: none; 
+            padding: 10px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            transition: opacity 0.2s;
+        }
+        
+        button:hover { opacity: 0.9; }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        button.warning { background: var(--warning); }
+        button.success { background: var(--success); }
+        button.secondary { background: #95a5a6; }
+        button.point { background: #8e44ad; }
+        button.info { background: #3498db; }
+        
+        input, select { 
+            width: 100%; 
+            padding: 8px; 
+            margin: 5px 0; 
+            border-radius: 4px; 
+            border: none; 
+            box-sizing: border-box;
+            font-size: 0.85rem;
+        }
+        
+        .small-input {
+            font-size: 0.8rem !important;
+            padding: 6px !important;
+        }
+        
+        .property-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 10px 0;
+        }
+        
+        .property-fields.full-width {
+            grid-template-columns: 1fr;
+        }
+        
+        .location-toggle {
+            display: flex;
+            margin: 10px 0;
+            background: #34495e;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .location-toggle button {
+            flex: 1;
+            border-radius: 0;
+            padding: 8px;
+            background: #34495e;
+        }
+        
+        .location-toggle button.active {
+            background: var(--accent);
+        }
+        
+        .gps-status {
+            padding: 8px;
+            margin: 10px 0;
+            background: #34495e;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .gps-accuracy-bar {
+            height: 6px;
+            background: #2c3e50;
+            border-radius: 3px;
+            margin: 5px 0;
+            overflow: hidden;
+        }
+        
+        .gps-accuracy-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s, background 0.5s;
+        }
+        
+        .gps-status-text {
+            font-size: 0.7rem;
+            text-align: center;
+            color: #bdc3c7;
+        }
+        
+        .table-container { 
+            background: #1a252f; 
+            border-radius: 6px; 
+            overflow-x: auto; 
+            max-height: 180px;
+            font-size: 0.75rem; 
+            flex-grow: 1;
+            margin-bottom: 10px;
+        }
+        
+        .log-container {
+            background: #1a252f;
+            border-radius: 6px;
+            overflow-x: auto;
+            max-height: 180px;
+            font-size: 0.75rem;
+            flex-grow: 1;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .log-header {
+            padding: 8px;
+            background: #2c3e50;
+            border-bottom: 1px solid #34495e;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .log-content {
+            padding: 8px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+        
+        .log-entry {
+            padding: 6px 8px;
+            margin-bottom: 4px;
+            background: #2c3e50;
+            border-radius: 4px;
+            border-left: 3px solid #3498db;
+            font-size: 0.7rem;
+        }
+        
+        .log-entry.success {
+            border-left-color: #27ae60;
+        }
+        
+        .log-entry.warning {
+            border-left-color: #f39c12;
+        }
+        
+        .log-entry.error {
+            border-left-color: #e74c3c;
+        }
+        
+        .log-time {
+            color: #95a5a6;
+            font-size: 0.65rem;
+            margin-bottom: 2px;
+        }
+        
+        .log-message {
+            color: white;
+        }
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+        }
+        
+        th, td { 
+            padding: 8px; 
+            text-align: left; 
+            border-bottom: 1px solid #2c3e50; 
+        }
+        
+        tr:hover { background: #2c3e50; cursor: pointer; }
+        
+        .preview-panel {
+            display: none;
+            background: #34495e;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 10px;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .preview-panel h4 {
+            margin-top: 0;
+            color: var(--accent);
+            border-bottom: 1px solid #4a6278;
+            padding-bottom: 5px;
+        }
+        
+        .preview-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            font-size: 0.85rem;
+        }
+        
+        .preview-item {
+            margin-bottom: 5px;
+        }
+        
+        .preview-label {
+            font-weight: bold;
+            color: #bdc3c7;
+        }
+        
+        .preview-value {
+            color: white;
+        }
+        
+        .evidence-container {
+            margin: 10px 0;
+        }
+        
+        .camera-btn {
+            width: 100%;
+            margin: 5px 0;
+            background: #8e44ad !important;
+        }
+        
+        .image-preview {
+            max-width: 100%;
+            max-height: 150px;
+            margin-top: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        #coordinates {
+            font-size: 0.7rem;
+            color: #bdc3c7;
+            text-align: center;
+            padding: 5px;
+            background: #2c3e50;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        
+        @media (max-width: 768px) { 
+            body { flex-direction: column; } 
+            #sidebar { width: 100%; height: 50%; } 
+            #map { height: 50%; } 
+        }
+        
+        .map-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .map-controls button {
+            background: white;
+            color: var(--primary);
+            border-radius: 4px;
+            padding: 8px 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .manual-marker {
+            background: none;
+            border: none;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .gps-accuracy-threshold {
+            position: absolute;
+            top: 60px;
+            left: 10px;
+            background: rgba(44, 62, 80, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            z-index: 1000;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .auto-center-control {
+            position: absolute;
+            bottom: 20px;
+            right: 10px;
+            z-index: 1000;
+        }
+        
+        .auto-center-control button {
+            background: white;
+            color: var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .auto-center-control button.active {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .storage-status {
+            padding: 8px;
+            margin: 10px 0;
+            background: #34495e;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+        
+        .storage-bar {
+            height: 8px;
+            background: #2c3e50;
+            border-radius: 4px;
+            margin: 8px 0;
+            overflow: hidden;
+        }
+        
+        .storage-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #27ae60, #f39c12);
+            transition: width 0.5s;
+        }
+        
+        .storage-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #bdc3c7;
+        }
+        
+        .storage-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal {
+            background: var(--panel-bg);
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal h3 {
+            margin-top: 0;
+            color: var(--accent);
+            border-bottom: 1px solid #4a6278;
+            padding-bottom: 10px;
+        }
+        
+        .data-backup {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .field-group {
+            margin: 8px 0;
+        }
+        
+        .field-group label {
+            font-size: 0.75rem;
+            color: #bdc3c7;
+            display: block;
+            margin-bottom: 3px;
+        }
+        
+        .section-title {
+            color: var(--accent);
+            font-size: 0.9rem;
+            margin: 15px 0 8px 0;
+            border-bottom: 1px solid #4a6278;
+            padding-bottom: 5px;
+        }
     </style>
 </head>
 <body>
 
 <div id="sidebar">
-    <h2 style="margin:0 0 10px 0; color:var(--warning); letter-spacing: 1px;">LAVMIS PRO</h2>
-    
-    <div class="status-container">
-        <div id="gps-status" class="status-box bad">GPS: NO FIX</div>
-        <div id="net-status" class="status-box bad">OFFLINE</div>
+    <div class="status-bar">
+        <span id="net-label" class="indicator on">ONLINE</span>
+        <span style="font-size: 1.2rem; font-weight: bold; color: var(--valuation);">LAVMIS PRO</span>
     </div>
 
     <div class="panel">
-        <div class="grid-2">
-            <button id="followBtn" onclick="toggleFollow()" class="btn-nav"><i class="fa-solid fa-person-walking"></i> FOLLOW: ON</button>
-            <button onclick="seedSatellite()" style="background:var(--warning); color:#000; font-size:0.7rem;">CACHE MAP</button>
+        <h3><i class="fa-solid fa-map"></i> Offline Map Cache</h3>
+        <p style="font-size: 0.75rem; color: #bdc3c7;">Zoom into your project area while online, then click "Cache Visible Area" to save imagery for offline use.</p>
+        <div class="cache-controls">
+            <button onclick="cacheTiles()" style="background: var(--valuation); color: #1a252f;">Cache Area</button>
+            <button onclick="clearCache()" style="background: #95a5a6;">Clear Map</button>
         </div>
-        <div id="cache-info" style="font-size: 0.6rem; color: var(--success); text-align: center; margin-top: 5px; display: none;">Caching tiles... <span id="p-val">0</span>%</div>
+        <div id="cache-status" style="font-size: 0.7rem; margin-top: 5px;">Storage Used: Calculating...</div>
     </div>
 
-    <div id="capturePanel" class="panel locked">
-        <div class="locked-overlay" id="lockMsg">WAITING FOR STABLE GPS<br>(3m - 15m)</div>
+    <div class="panel">
+        <h3><i class="fa-solid fa-location-crosshairs"></i> Data Capture</h3>
         
-        <input type="text" id="propId" placeholder="Property ID / Name">
-        <div class="grid-2">
-            <input type="text" id="blk" placeholder="Block No.">
-            <input type="text" id="plt" placeholder="Plot No.">
+        <div class="section-title">Property Information</div>
+        
+        <div class="property-fields">
+            <div class="field-group">
+                <label for="propertyId">Property ID</label>
+                <input type="text" id="propertyId" placeholder="Enter Property ID" class="small-input">
+            </div>
+            <div class="field-group">
+                <label for="propertyName">Property Name</label>
+                <input type="text" id="propertyName" placeholder="Enter Property Name" class="small-input">
+            </div>
         </div>
-        <select id="landUse">
-            <option value="Residential">Residential</option>
-            <option value="Commercial">Commercial</option>
-            <option value="Agricultural">Agricultural</option>
-            <option value="Industrial">Industrial</option>
-        </select>
-        <textarea id="desc" rows="2" placeholder="Property Description..."></textarea>
-        <div class="grid-2">
-            <input type="number" id="price" placeholder="Price ($)">
-            <input type="number" id="size" placeholder="Size (Ha)">
+        
+        <div class="property-fields">
+            <div class="field-group">
+                <label for="district">District</label>
+                <input type="text" id="district" placeholder="Enter District" class="small-input">
+            </div>
+            <div class="field-group">
+                <label for="county">County</label>
+                <input type="text" id="county" placeholder="Enter County" class="small-input">
+            </div>
         </div>
-        <input type="file" id="photo" accept="image/*" capture="environment">
-        <button onclick="saveRecord()" class="btn-success"><i class="fa-solid fa-floppy-disk"></i> SAVE & CLEAR</button>
+        
+        <div class="property-fields">
+            <div class="field-group">
+                <label for="subcounty">Subcounty</label>
+                <input type="text" id="subcounty" placeholder="Enter Subcounty" class="small-input">
+            </div>
+            <div class="field-group">
+                <label for="parish">Parish</label>
+                <input type="text" id="parish" placeholder="Enter Parish" class="small-input">
+            </div>
+        </div>
+        
+        <div class="property-fields full-width">
+            <div class="field-group">
+                <label for="village">Village</label>
+                <input type="text" id="village" placeholder="Enter Village" class="small-input">
+            </div>
+        </div>
+        
+        <div class="section-title">Location & Valuation</div>
+        
+        <div class="location-toggle">
+            <button id="gpsToggle" class="active" onclick="setLocationMode('gps')">
+                <i class="fa-solid fa-satellite"></i> GPS Auto
+            </button>
+            <button id="manualToggle" onclick="setLocationMode('manual')">
+                <i class="fa-solid fa-map-pin"></i> Map Point
+            </button>
+        </div>
+        
+        <div class="gps-status">
+            <i class="fa-solid fa-satellite" id="gpsIcon"></i>
+            <div style="flex-grow: 1;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.7rem;">
+                    <span id="gpsStatusText">Acquiring GPS...</span>
+                    <span id="gpsAccuracy">-- m</span>
+                </div>
+                <div class="gps-accuracy-bar">
+                    <div id="gpsAccuracyFill" class="gps-accuracy-fill" style="width: 0%; background: #e74c3c;"></div>
+                </div>
+                <div class="gps-status-text" id="gpsStatusDetail">
+                    Need 3-15m accuracy to save data
+                </div>
+            </div>
+        </div>
+        
+        <div id="coordinates">Waiting for GPS...</div>
+        
+        <div style="margin: 10px 0;">
+            <button onclick="clearManualPoint()" class="secondary" style="width: 100%;" id="clearPointBtn" disabled>
+                <i class="fa-solid fa-trash"></i> Clear Selected Point
+            </button>
+        </div>
+        
+        <div class="property-fields">
+            <div class="field-group">
+                <label for="price">Total Price ($)</label>
+                <input type="number" id="price" placeholder="Total Price" step="0.01">
+            </div>
+            <div class="field-group">
+                <label for="size">Size (Ha)</label>
+                <input type="number" id="size" placeholder="Size (Ha)" step="0.01">
+            </div>
+        </div>
+        
+        <div class="field-group">
+            <label for="use">Land Use</label>
+            <select id="use">
+                <option value="">Select Land Use</option>
+                <option>Residential</option>
+                <option>Commercial</option>
+                <option>Agricultural</option>
+                <option>Industrial</option>
+                <option>Recreational</option>
+                <option>Mixed Use</option>
+                <option>Vacant Land</option>
+                <option>Forest</option>
+                <option>Wetland</option>
+            </select>
+        </div>
+        
+        <div class="section-title">Evidence</div>
+        
+        <div class="evidence-container">
+            <button class="camera-btn" onclick="capturePhoto()">
+                <i class="fa-solid fa-camera"></i> ADD EVIDENCE PHOTO (Optional)
+            </button>
+            <input type="file" id="photoInput" accept="image/*" capture="environment" style="display: none;" onchange="handlePhotoUpload(event)">
+            <img id="imagePreview" class="image-preview" alt="Evidence Preview">
+            <button id="removePhotoBtn" class="warning" onclick="removePhoto()" style="display: none; width: 100%;">
+                <i class="fa-solid fa-trash"></i> Remove Photo
+            </button>
+        </div>
+        
+        <button id="saveBtn" onclick="saveData()" class="success" style="width: 100%; margin-top: 10px;" disabled>
+            <i class="fa-solid fa-save"></i> SAVE PROPERTY RECORD
+        </button>
     </div>
 
     <div class="panel">
-        <button onclick="enableManualMode()" class="btn-manual"><i class="fa-solid fa-hand-pointer"></i> MANUAL PICK (GPS BACKUP)</button>
-        <div id="manual-coords" style="font-size:0.65rem; color:#7f8c8d; margin-top:5px; text-align:center;">Using Real-time GPS</div>
+        <h3><i class="fa-solid fa-database"></i> Local Storage Status</h3>
+        <div class="storage-status">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <span>Data Usage</span>
+                <span id="recordCount">0 records</span>
+            </div>
+            <div class="storage-bar">
+                <div id="storageFill" class="storage-fill" style="width: 0%"></div>
+            </div>
+            <div class="storage-info">
+                <span id="storageUsed">0 MB</span>
+                <span id="storageTotal">Calculating...</span>
+            </div>
+        </div>
+        <div class="storage-actions">
+            <button onclick="showBackupModal()" class="info">
+                <i class="fa-solid fa-download"></i> Backup
+            </button>
+            <button onclick="showRestoreModal()" class="secondary">
+                <i class="fa-solid fa-upload"></i> Restore
+            </button>
+        </div>
+        <button onclick="clearAllData()" class="warning" style="width: 100%; margin-top: 10px;">
+            <i class="fa-solid fa-trash"></i> Clear All Data
+        </button>
     </div>
 
-    <div style="font-size: 0.75rem; color: var(--accent); font-weight: bold; margin-bottom: 5px;">PROPERTY LOG</div>
-    <div class="data-log" id="dataLog"></div>
-    <button onclick="exportExcel()" style="background:#27ae60; color:white; margin-top:15px;"><i class="fa-solid fa-file-excel"></i> EXPORT TO EXCEL</button>
+    <div class="table-container">
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Property ID</th>
+                    <th>Name</th>
+                    <th>Rate/Ha</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    
+    <div class="log-container">
+        <div class="log-header">
+            <h4 style="margin: 0;"><i class="fa-solid fa-clipboard-list"></i> Activity Log</h4>
+            <button onclick="clearLog()" class="secondary" style="padding: 4px 8px; font-size: 0.7rem;">
+                <i class="fa-solid fa-trash"></i> Clear
+            </button>
+        </div>
+        <div class="log-content" id="logContent">
+            <!-- Log entries will be added here -->
+        </div>
+    </div>
+    
+    <div id="dataPreview" class="preview-panel">
+        <h4><i class="fa-solid fa-eye"></i> PROPERTY RECORD PREVIEW</h4>
+        <div class="preview-grid" id="previewContent">
+            <!-- Preview content will be injected here -->
+        </div>
+        <button onclick="hidePreview()" class="secondary" style="width: 100%; margin-top: 10px;">
+            <i class="fa-solid fa-times"></i> Close Preview
+        </button>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+        <button onclick="exportData()" class="success">
+            <i class="fa-solid fa-file-excel"></i> Export Excel
+        </button>
+        <button onclick="exportGeoJSON()" class="info">
+            <i class="fa-solid fa-globe"></i> Export GeoJSON
+        </button>
+    </div>
 </div>
 
 <div id="map"></div>
+
+<div class="gps-accuracy-threshold" id="accuracyThreshold">
+    <i class="fa-solid fa-bullseye"></i> GPS Accuracy: 3-15m required
+</div>
+
+<div class="auto-center-control">
+    <button id="autoCenterToggle" onclick="toggleAutoCenter()" title="Auto-center on GPS">
+        <i class="fa-solid fa-location-crosshairs"></i>
+    </button>
+</div>
+
+<div class="map-controls">
+    <button onclick="centerOnGPS()" title="Center on GPS" id="centerGPSBtn">
+        <i class="fa-solid fa-location-arrow"></i>
+    </button>
+    <button onclick="clearAllMarkers()" class="warning" title="Clear all markers">
+        <i class="fa-solid fa-trash"></i>
+    </button>
+</div>
+
+<!-- Backup Modal -->
+<div id="backupModal" class="modal-overlay">
+    <div class="modal">
+        <h3><i class="fa-solid fa-download"></i> Data Backup</h3>
+        <p style="font-size: 0.85rem; color: #bdc3c7;">Backup your data to a file for safekeeping or transfer to another device.</p>
+        
+        <div class="data-backup">
+            <button onclick="backupData('json')" class="info">
+                <i class="fa-solid fa-code"></i> Backup as JSON
+            </button>
+            <button onclick="backupData('csv')" class="success">
+                <i class="fa-solid fa-file-csv"></i> Backup as CSV
+            </button>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <h4><i class="fa-solid fa-file-export"></i> Export Formats</h4>
+            <div style="font-size: 0.8rem; color: #bdc3c7;">
+                <p><strong>JSON</strong>: Full data including photos (base64 encoded)</p>
+                <p><strong>CSV</strong>: Tabular data only (photos excluded)</p>
+            </div>
+        </div>
+        
+        <button onclick="hideModal()" class="secondary" style="width: 100%; margin-top: 20px;">
+            <i class="fa-solid fa-times"></i> Close
+        </button>
+    </div>
+</div>
+
+<!-- Restore Modal -->
+<div id="restoreModal" class="modal-overlay">
+    <div class="modal">
+        <h3><i class="fa-solid fa-upload"></i> Data Restore</h3>
+        <p style="font-size: 0.85rem; color: #bdc3c7;">Restore data from a previously created backup file.</p>
+        
+        <div style="margin: 20px 0;">
+            <input type="file" id="restoreFile" accept=".json,.csv" style="width: 100%; padding: 10px; background: #2c3e50; border-radius: 4px; color: white;">
+            <button onclick="restoreData()" class="success" style="width: 100%; margin-top: 10px;">
+                <i class="fa-solid fa-upload"></i> Restore Data
+            </button>
+        </div>
+        
+        <div style="background: #2c3e50; padding: 10px; border-radius: 4px; margin-top: 15px;">
+            <h4 style="margin: 0 0 10px 0; font-size: 0.9rem;"><i class="fa-solid fa-triangle-exclamation"></i> Warning</h4>
+            <p style="font-size: 0.8rem; color: #bdc3c7; margin: 0;">
+                Restoring data will replace all existing records. Make sure you have a current backup before proceeding.
+            </p>
+        </div>
+        
+        <button onclick="hideModal()" class="secondary" style="width: 100%; margin-top: 20px;">
+            <i class="fa-solid fa-times"></i> Close
+        </button>
+    </div>
+</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/pouchdb@8.0.1/dist/pouchdb.min.js"></script>
@@ -99,181 +793,1318 @@
 <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
 
 <script>
-    // 1. PWA REGISTRATION
-    if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
-
-    const map = L.map('map', { zoomControl: false, maxZoom: 18 }).setView([0,0], 2);
+    // 1. DATABASE & MAP INITIALIZATION
+    const map = L.map('map', { 
+        zoomControl: false,
+        zoomSnap: 0.1,
+        zoomDelta: 0.5
+    }).setView([0, 0], 2);
+    
     const savedLayer = L.featureGroup().addTo(map);
     const liveLayer = L.layerGroup().addTo(map);
+    const manualLayer = L.layerGroup().addTo(map);
+    const accuracyLayer = L.layerGroup().addTo(map);
+    
+    let locationMode = 'gps'; // 'gps' or 'manual'
+    let currentPos = null;
+    let currentAccuracy = null;
+    let manualPos = null;
+    let evidencePhoto = null;
+    let manualMarker = null;
+    let isManualModeActive = false;
+    let autoCenterEnabled = true;
+    let gpsWatchId = null;
+    let lastGpsUpdate = null;
 
+    // 2. LOGGING SYSTEM
+    class Logger {
+        constructor() {
+            this.maxLogEntries = 100;
+            this.logContainer = document.getElementById('logContent');
+            this.initializeLog();
+        }
+        
+        initializeLog() {
+            let logs = JSON.parse(localStorage.getItem('lavmis_logs') || '[]');
+            logs.forEach(log => this.addLogEntry(log.message, log.type, log.timestamp, false));
+        }
+        
+        addLogEntry(message, type = 'info', timestamp = null, saveToStorage = true) {
+            const logEntry = {
+                timestamp: timestamp || new Date().toISOString(),
+                message: message,
+                type: type
+            };
+            
+            // Add to UI
+            const logElement = document.createElement('div');
+            logElement.className = `log-entry ${type}`;
+            logElement.innerHTML = `
+                <div class="log-time">${this.formatTime(logEntry.timestamp)}</div>
+                <div class="log-message">${message}</div>
+            `;
+            
+            this.logContainer.insertBefore(logElement, this.logContainer.firstChild);
+            
+            // Limit number of displayed logs
+            if (this.logContainer.children.length > this.maxLogEntries) {
+                this.logContainer.removeChild(this.logContainer.lastChild);
+            }
+            
+            // Save to storage
+            if (saveToStorage) {
+                let logs = JSON.parse(localStorage.getItem('lavmis_logs') || '[]');
+                logs.unshift(logEntry);
+                if (logs.length > this.maxLogEntries) {
+                    logs = logs.slice(0, this.maxLogEntries);
+                }
+                localStorage.setItem('lavmis_logs', JSON.stringify(logs));
+            }
+            
+            // Auto-scroll to top
+            this.logContainer.scrollTop = 0;
+        }
+        
+        formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) + 
+                   ' ' + date.toLocaleDateString([], {month: 'short', day: 'numeric'});
+        }
+        
+        clearLog() {
+            if (confirm("Clear all log entries?")) {
+                localStorage.removeItem('lavmis_logs');
+                this.logContainer.innerHTML = '';
+                this.addLogEntry("Log cleared", "info");
+            }
+        }
+    }
+
+    const logger = new Logger();
+
+    // 3. STORAGE MANAGEMENT
+    class StorageManager {
+        constructor() {
+            this.updateStorageDisplay();
+            setInterval(() => this.updateStorageDisplay(), 30000); // Update every 30 seconds
+        }
+        
+        updateStorageDisplay() {
+            // Update record count
+            const db = JSON.parse(localStorage.getItem('lavmis_pro_db') || '[]');
+            document.getElementById('recordCount').textContent = `${db.length} property records`;
+            
+            // Calculate storage usage
+            const dataSize = this.calculateDataSize();
+            const storageFill = document.getElementById('storageFill');
+            const storageUsed = document.getElementById('storageUsed');
+            const storageTotal = document.getElementById('storageTotal');
+            
+            storageUsed.textContent = `${dataSize.toFixed(2)} MB`;
+            
+            if (navigator.storage && navigator.storage.estimate) {
+                navigator.storage.estimate().then(estimate => {
+                    const totalMB = (estimate.quota / 1024 / 1024).toFixed(2);
+                    const usedPercent = (dataSize / totalMB * 100);
+                    
+                    storageTotal.textContent = `${totalMB} MB total`;
+                    storageFill.style.width = `${Math.min(usedPercent, 100)}%`;
+                });
+            }
+        }
+        
+        calculateDataSize() {
+            let totalSize = 0;
+            
+            // Calculate database size
+            const db = localStorage.getItem('lavmis_pro_db');
+            if (db) {
+                totalSize += new Blob([db]).size;
+            }
+            
+            // Calculate logs size
+            const logs = localStorage.getItem('lavmis_logs');
+            if (logs) {
+                totalSize += new Blob([logs]).size;
+            }
+            
+            // Calculate evidence photos size (approximate)
+            const evidenceData = this.getEvidenceDataSize();
+            totalSize += evidenceData;
+            
+            return totalSize / 1024 / 1024; // Convert to MB
+        }
+        
+        getEvidenceDataSize() {
+            const db = JSON.parse(localStorage.getItem('lavmis_pro_db') || '[]');
+            let totalSize = 0;
+            
+            db.forEach(record => {
+                if (record.evidence) {
+                    // Base64 string size approximation (3/4 of string length)
+                    totalSize += record.evidence.length * 0.75;
+                }
+            });
+            
+            return totalSize;
+        }
+        
+        backupData(format = 'json') {
+            const db = JSON.parse(localStorage.getItem('lavmis_pro_db') || '[]');
+            const logs = JSON.parse(localStorage.getItem('lavmis_logs') || '[]');
+            const backup = {
+                version: '1.0',
+                timestamp: new Date().toISOString(),
+                app: 'LAVMIS Pro',
+                data: db,
+                logs: logs,
+                metadata: {
+                    totalRecords: db.length,
+                    totalLogs: logs.length
+                }
+            };
+            
+            let content, filename, mimeType;
+            
+            if (format === 'json') {
+                content = JSON.stringify(backup, null, 2);
+                filename = `lavmis_properties_backup_${new Date().toISOString().slice(0,10)}.json`;
+                mimeType = 'application/json';
+            } else if (format === 'csv') {
+                // Create CSV without evidence photos
+                const csvData = db.map(record => ({
+                    'Property ID': record.propertyId,
+                    'Property Name': record.propertyName,
+                    'District': record.district,
+                    'County': record.county,
+                    'Subcounty': record.subcounty,
+                    'Parish': record.parish,
+                    'Village': record.village,
+                    'Date': record.formattedDate,
+                    'Land Use': record.landUse,
+                    'Price ($)': record.price,
+                    'Size (Ha)': record.size,
+                    'Rate ($/Ha)': record.rate,
+                    'Latitude': record.latitude,
+                    'Longitude': record.longitude,
+                    'GPS Accuracy (m)': record.gpsAccuracy || 'N/A',
+                    'Location Source': record.positionSource,
+                    'Has Evidence': record.evidence ? 'Yes' : 'No'
+                }));
+                
+                const ws = XLSX.utils.json_to_sheet(csvData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "PropertyData");
+                content = XLSX.write(wb, { bookType: 'csv', type: 'binary' });
+                filename = `lavmis_properties_backup_${new Date().toISOString().slice(0,10)}.csv`;
+                mimeType = 'text/csv';
+                
+                // Convert to blob
+                const buffer = new ArrayBuffer(content.length);
+                const view = new Uint8Array(buffer);
+                for (let i = 0; i < content.length; i++) {
+                    view[i] = content.charCodeAt(i) & 0xFF;
+                }
+                content = buffer;
+            }
+            
+            // Download file
+            const blob = new Blob([content], { type: mimeType });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            logger.addLogEntry(`Property data backed up as ${format.toUpperCase()}`, 'success');
+            this.updateStorageDisplay();
+        }
+        
+        restoreData(file) {
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                try {
+                    const content = e.target.result;
+                    let restoredData;
+                    
+                    if (file.name.endsWith('.json')) {
+                        restoredData = JSON.parse(content);
+                        
+                        // Validate backup format
+                        if (!restoredData.data || !Array.isArray(restoredData.data)) {
+                            throw new Error('Invalid backup format');
+                        }
+                        
+                        // Restore data
+                        localStorage.setItem('lavmis_pro_db', JSON.stringify(restoredData.data));
+                        
+                        // Restore logs if available
+                        if (restoredData.logs && Array.isArray(restoredData.logs)) {
+                            localStorage.setItem('lavmis_logs', JSON.stringify(restoredData.logs));
+                        }
+                        
+                    } else if (file.name.endsWith('.csv')) {
+                        // Parse CSV
+                        const workbook = XLSX.read(content, { type: 'binary' });
+                        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const csvData = XLSX.utils.sheet_to_json(worksheet);
+                        
+                        // Convert CSV data to our format
+                        const restoredRecords = csvData.map(row => ({
+                            id: Date.now() + Math.random(),
+                            date: new Date().toISOString(),
+                            formattedDate: row.Date || new Date().toLocaleDateString(),
+                            propertyId: row['Property ID'] || '',
+                            propertyName: row['Property Name'] || '',
+                            district: row.District || '',
+                            county: row.County || '',
+                            subcounty: row.Subcounty || '',
+                            parish: row.Parish || '',
+                            village: row.Village || '',
+                            landUse: row['Land Use'] || 'Unknown',
+                            price: parseFloat(row['Price ($)']) || 0,
+                            size: parseFloat(row['Size (Ha)']) || 0,
+                            rate: parseFloat(row['Rate ($/Ha)']) || 0,
+                            latitude: parseFloat(row.Latitude) || 0,
+                            longitude: parseFloat(row.Longitude) || 0,
+                            coordinates: `${parseFloat(row.Latitude) || 0}, ${parseFloat(row.Longitude) || 0}`,
+                            evidence: null,
+                            locationMode: 'imported',
+                            positionSource: row['Location Source'] || 'CSV Import',
+                            gpsAccuracy: row['GPS Accuracy (m)'] || null
+                        }));
+                        
+                        localStorage.setItem('lavmis_pro_db', JSON.stringify(restoredRecords));
+                    }
+                    
+                    // Reload data
+                    location.reload();
+                    logger.addLogEntry(`Property data restored from ${file.name}`, 'success');
+                    
+                } catch (error) {
+                    logger.addLogEntry(`Restore failed: ${error.message}`, 'error');
+                    alert(`Restore failed: ${error.message}`);
+                }
+            };
+            
+            if (file.name.endsWith('.csv')) {
+                reader.readAsBinaryString(file);
+            } else {
+                reader.readAsText(file);
+            }
+        }
+        
+        clearAllData() {
+            if (confirm("Are you sure you want to delete ALL property data, logs, and markers? This cannot be undone!")) {
+                // Backup current data first
+                const db = localStorage.getItem('lavmis_pro_db');
+                const logs = localStorage.getItem('lavmis_logs');
+                
+                // Store backup in memory for undo
+                sessionStorage.setItem('last_backup_db', db);
+                sessionStorage.setItem('last_backup_logs', logs);
+                
+                // Clear all data
+                localStorage.removeItem('lavmis_pro_db');
+                localStorage.removeItem('lavmis_logs');
+                
+                // Clear map
+                savedLayer.clearLayers();
+                liveLayer.clearLayers();
+                manualLayer.clearLayers();
+                accuracyLayer.clearLayers();
+                
+                // Update UI
+                updateTable();
+                logger.logContainer.innerHTML = '';
+                logger.addLogEntry("All property data cleared", "warning");
+                this.updateStorageDisplay();
+                
+                // Show undo option
+                setTimeout(() => {
+                    if (confirm("Property data cleared. Click OK to undo, or Cancel to keep cleared data.")) {
+                        this.undoClear();
+                    }
+                }, 100);
+            }
+        }
+        
+        undoClear() {
+            const db = sessionStorage.getItem('last_backup_db');
+            const logs = sessionStorage.getItem('last_backup_logs');
+            
+            if (db) {
+                localStorage.setItem('lavmis_pro_db', db);
+                const parsedDb = JSON.parse(db);
+                parsedDb.forEach(plotPoint);
+                updateTable();
+            }
+            
+            if (logs) {
+                localStorage.setItem('lavmis_logs', logs);
+                logger.initializeLog();
+            }
+            
+            logger.addLogEntry("Property data restore completed", "success");
+            this.updateStorageDisplay();
+        }
+    }
+
+    const storageManager = new StorageManager();
+
+    // 4. SATELLITE LAYER WITH CACHING
     const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        useCache: true, crossOrigin: true, cacheMaxAge: 1209600000 
+        useCache: true,
+        crossOrigin: true,
+        cacheMaxAge: 604800000 // 7 days in ms
     }).addTo(map);
 
-    // 2. APP STATE
-    let currentPos = null;
-    let manualPos = null;
-    let isManualMode = false;
-    let isFollowing = true;
-    let isFirstFix = true;
-
-    // 3. GPS ACCURACY ENGINE
-    navigator.geolocation.watchPosition(pos => {
-        currentPos = pos;
-        const { latitude, longitude, accuracy } = pos.coords;
-        const gpsStatus = document.getElementById('gps-status');
-        const capturePanel = document.getElementById('capturePanel');
-        
-        gpsStatus.innerText = `GPS: ${accuracy.toFixed(1)}m`;
-
-        if (isFirstFix && accuracy <= 25) {
-            map.flyTo([latitude, longitude], 17);
-            isFirstFix = false;
-        } else if (isFollowing) {
-            map.panTo([latitude, longitude]);
-        }
-
-        // UNLOCK GATE: Validates accuracy
-        if (isManualMode || (accuracy <= 15)) {
-            gpsStatus.className = "status-box good";
-            capturePanel.classList.remove('locked');
-        } else {
-            gpsStatus.className = "status-box warn";
-            capturePanel.classList.add('locked');
-            document.getElementById('lockMsg').innerHTML = `ACCURACY POOR (${accuracy.toFixed(0)}m)<br>WAIT FOR BETTER SIGNAL`;
-        }
-
-        liveLayer.clearLayers();
-        L.circleMarker([latitude, longitude], {
-            radius: 8, color: '#fff', fillColor: '#3498db', fillOpacity: 1, weight: 3
-        }).addTo(liveLayer);
-
-    }, err => console.warn(err), { enableHighAccuracy: true, maximumAge: 1000 });
-
-    // 4. MAP NAVIGATION
-    function toggleFollow() {
-        isFollowing = !isFollowing;
-        const btn = document.getElementById('followBtn');
-        btn.innerHTML = isFollowing ? '<i class="fa-solid fa-person-walking"></i> FOLLOW: ON' : '<i class="fa-solid fa-hand"></i> FOLLOW: OFF';
-        btn.style.background = isFollowing ? "#8e44ad" : "#34495e";
-    }
-
-    map.on('movestart', (e) => { if (!e.hard && isFollowing) toggleFollow(); });
-
-    function seedSatellite() {
-        if (map.getZoom() < 15) return alert("Zoom into the property site (Z15+) first.");
-        document.getElementById('cache-info').style.display = 'block';
-        satellite.seed(map.getBounds(), map.getZoom(), map.getZoom() + 1);
-    }
-    satellite.on('seedprogress', e => document.getElementById('p-val').innerText = Math.floor((e.downloaded/e.remaining)*100));
-    satellite.on('seedend', () => { alert("Offline map cached!"); document.getElementById('cache-info').style.display = 'none'; });
-
-    function enableManualMode() {
-        isManualMode = true;
-        document.getElementById('capturePanel').classList.remove('locked');
-        document.getElementById('manual-coords').innerText = "TAP MAP TO SET POINT";
-        document.getElementById('manual-coords').style.color = "var(--warning)";
-        map.getContainer().style.cursor = "crosshair";
-    }
-
-    map.on('click', e => {
-        if (!isManualMode) return;
-        manualPos = e.latlng;
-        document.getElementById('manual-coords').innerText = `Set: ${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`;
-        map.getContainer().style.cursor = "";
+    // Network Awareness
+    window.addEventListener('online', () => {
+        toggleNet(true);
+        logger.addLogEntry("Network connection restored", "success");
+    });
+    window.addEventListener('offline', () => {
+        toggleNet(false);
+        logger.addLogEntry("Working offline", "warning");
     });
 
-    // 5. DATA MANAGEMENT & FORM RESET
-    async function saveRecord() {
-        const lat = manualPos ? manualPos.lat : currentPos.coords.latitude;
-        const lng = manualPos ? manualPos.lng : currentPos.coords.longitude;
+    function toggleNet(online) {
+        const lbl = document.getElementById('net-label');
+        lbl.innerText = online ? "ONLINE" : "OFFLINE";
+        lbl.className = online ? "indicator on" : "indicator off";
+    }
+
+    // 5. GPS ACCURACY MANAGEMENT
+    function updateGpsStatus(accuracy, position = null) {
+        const accuracyText = document.getElementById('gpsAccuracy');
+        const accuracyFill = document.getElementById('gpsAccuracyFill');
+        const gpsIcon = document.getElementById('gpsIcon');
+        const statusText = document.getElementById('gpsStatusText');
+        const statusDetail = document.getElementById('gpsStatusDetail');
+        const saveBtn = document.getElementById('saveBtn');
         
-        const photoFile = document.getElementById('photo').files[0];
-        let photoData = "";
-        if (photoFile) {
-            photoData = await new Promise(r => {
-                const reader = new FileReader();
-                reader.onload = () => r(reader.result);
-                reader.readAsDataURL(photoFile);
-            });
+        currentAccuracy = accuracy;
+        
+        if (accuracy === null) {
+            accuracyText.textContent = '-- m';
+            accuracyFill.style.width = '0%';
+            accuracyFill.style.background = '#e74c3c';
+            gpsIcon.className = 'fa-solid fa-satellite-slash';
+            statusText.textContent = 'GPS Not Available';
+            statusDetail.textContent = 'Waiting for GPS signal...';
+            saveBtn.disabled = true;
+            return;
+        }
+        
+        accuracyText.textContent = `${accuracy.toFixed(1)} m`;
+        
+        // Calculate accuracy percentage (0-100%) where 3m = 100%, 50m = 0%
+        let accuracyPercent;
+        if (accuracy <= 3) {
+            accuracyPercent = 100;
+        } else if (accuracy >= 50) {
+            accuracyPercent = 0;
+        } else {
+            accuracyPercent = Math.max(0, 100 - ((accuracy - 3) / 47 * 100));
+        }
+        
+        accuracyFill.style.width = `${accuracyPercent}%`;
+        
+        // Determine color based on accuracy
+        if (accuracy >= 3 && accuracy <= 15) {
+            // Good accuracy (green)
+            accuracyFill.style.background = '#27ae60';
+            gpsIcon.className = 'fa-solid fa-satellite';
+            statusText.textContent = 'GPS Ready';
+            statusDetail.textContent = 'Good accuracy for data collection';
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> SAVE PROPERTY RECORD';
+        } else if (accuracy < 3) {
+            // Too accurate (might be mock location) - show warning
+            accuracyFill.style.background = '#f39c12';
+            gpsIcon.className = 'fa-solid fa-satellite';
+            statusText.textContent = 'High Accuracy';
+            statusDetail.textContent = 'Accuracy too high (possible mock location)';
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fa-solid fa-exclamation-triangle"></i> Accuracy Too High';
+        } else if (accuracy <= 30) {
+            // Moderate accuracy (yellow)
+            accuracyFill.style.background = '#f39c12';
+            gpsIcon.className = 'fa-solid fa-satellite';
+            statusText.textContent = 'Moderate Accuracy';
+            statusDetail.textContent = 'Move for better GPS signal';
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> WAIT FOR BETTER GPS';
+        } else {
+            // Poor accuracy (red)
+            accuracyFill.style.background = '#e74c3c';
+            gpsIcon.className = 'fa-solid fa-satellite';
+            statusText.textContent = 'Poor Accuracy';
+            statusDetail.textContent = 'Move to open area for better GPS';
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> NEED BETTER GPS';
+        }
+        
+        // Update accuracy circle on map
+        if (position) {
+            updateAccuracyCircle(position, accuracy);
+        }
+    }
+
+    function updateAccuracyCircle(position, accuracy) {
+        accuracyLayer.clearLayers();
+        
+        if (accuracy && accuracy <= 100) { // Only show up to 100m accuracy circle
+            const circle = L.circle(position, {
+                radius: accuracy,
+                color: '#3498db',
+                fillColor: '#3498db',
+                fillOpacity: 0.1,
+                weight: 1,
+                dashArray: '5, 5'
+            }).addTo(accuracyLayer);
+            
+            // Add accuracy text
+            L.marker(position, {
+                icon: L.divIcon({
+                    className: 'accuracy-label',
+                    html: `<div style="
+                        background: rgba(52, 152, 219, 0.8);
+                        color: white;
+                        padding: 2px 6px;
+                        border-radius: 10px;
+                        font-size: 10px;
+                        white-space: nowrap;
+                    ">±${accuracy.toFixed(1)}m</div>`,
+                    iconSize: [60, 20],
+                    iconAnchor: [30, 20]
+                })
+            }).addTo(accuracyLayer);
+        }
+    }
+
+    // 6. GPS TRACKING WITH OFFLINE SUPPORT
+    function startGPS() {
+        if (!navigator.geolocation) {
+            updateGpsStatus(null);
+            logger.addLogEntry("GPS hardware not available", "error");
+            alert("GPS is not available on this device.");
+            return;
+        }
+        
+        const options = {
+            enableHighAccuracy: true,
+            maximumAge: 2000, // Accept cached position up to 2 seconds old
+            timeout: 10000    // Wait up to 10 seconds for position
+        };
+        
+        // Clear any existing watch
+        if (gpsWatchId !== null) {
+            navigator.geolocation.clearWatch(gpsWatchId);
+        }
+        
+        gpsWatchId = navigator.geolocation.watchPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                const accuracy = position.coords.accuracy;
+                const timestamp = position.timestamp;
+                
+                currentPos = [lat, lng];
+                lastGpsUpdate = timestamp;
+                
+                // Log GPS updates periodically
+                if (!lastGpsUpdate || (timestamp - lastGpsUpdate) > 30000) { // Log every 30 seconds
+                    logger.addLogEntry(`GPS position updated: ${accuracy.toFixed(1)}m accuracy`, "info");
+                    lastGpsUpdate = timestamp;
+                }
+                
+                // Update GPS status
+                updateGpsStatus(accuracy, currentPos);
+                
+                if (locationMode === 'gps') {
+                    // Update live layer
+                    liveLayer.clearLayers();
+                    
+                    // Add GPS marker
+                    L.circleMarker(currentPos, {
+                        radius: 8,
+                        color: '#fff',
+                        fillColor: '#3498db',
+                        fillOpacity: 0.9,
+                        weight: 2
+                    }).addTo(liveLayer);
+                    
+                    // Update coordinates display
+                    updateCoordinatesDisplay(currentPos[0], currentPos[1], 'GPS Location', accuracy);
+                    
+                    // Auto-center map if enabled
+                    if (autoCenterEnabled) {
+                        map.setView(currentPos, Math.max(map.getZoom(), 16));
+                    }
+                }
+            },
+            (error) => {
+                console.error('GPS Error:', error);
+                
+                let errorMsg = 'GPS Error: ';
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMsg = 'GPS permission denied. Please enable location services.';
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMsg = 'GPS position unavailable. Check device GPS.';
+                        break;
+                    case error.TIMEOUT:
+                        errorMsg = 'GPS timeout. Retrying...';
+                        // Retry GPS
+                        setTimeout(startGPS, 1000);
+                        break;
+                    default:
+                        errorMsg = `GPS Error: ${error.message}`;
+                }
+                
+                logger.addLogEntry(errorMsg, "error");
+                updateGpsStatus(null);
+                updateCoordinatesDisplay(null, null, errorMsg);
+                
+                // Try to use last known position if available
+                if (currentPos) {
+                    liveLayer.clearLayers();
+                    L.circleMarker(currentPos, {
+                        radius: 8,
+                        color: '#fff',
+                        fillColor: '#e74c3c',
+                        fillOpacity: 0.7,
+                        weight: 2
+                    }).addTo(liveLayer);
+                    updateCoordinatesDisplay(currentPos[0], currentPos[1], 'Last Known Location', currentAccuracy);
+                }
+            },
+            options
+        );
+    }
+
+    // 7. MODAL FUNCTIONS
+    function showBackupModal() {
+        document.getElementById('backupModal').style.display = 'flex';
+    }
+    
+    function showRestoreModal() {
+        document.getElementById('restoreModal').style.display = 'flex';
+    }
+    
+    function hideModal() {
+        document.getElementById('backupModal').style.display = 'none';
+        document.getElementById('restoreModal').style.display = 'none';
+        document.getElementById('restoreFile').value = '';
+    }
+
+    // 8. AUTO-CENTER FUNCTIONALITY
+    function toggleAutoCenter() {
+        autoCenterEnabled = !autoCenterEnabled;
+        const toggleBtn = document.getElementById('autoCenterToggle');
+        
+        if (autoCenterEnabled) {
+            toggleBtn.classList.add('active');
+            toggleBtn.title = 'Auto-center ON - Click to disable';
+            logger.addLogEntry("Auto-center enabled", "info");
+            
+            // If we have a current position, center on it
+            if (currentPos) {
+                map.setView(currentPos, Math.max(map.getZoom(), 16));
+            }
+        } else {
+            toggleBtn.classList.remove('active');
+            toggleBtn.title = 'Auto-center OFF - Click to enable';
+            logger.addLogEntry("Auto-center disabled", "info");
+        }
+    }
+
+    function centerOnGPS() {
+        if (currentPos) {
+            map.setView(currentPos, Math.max(map.getZoom(), 16));
+            logger.addLogEntry("Map centered on current GPS position", "info");
+        } else {
+            alert("No GPS position available. Waiting for GPS signal...");
+        }
+    }
+
+    // 9. LOCATION MODE FUNCTIONS
+    function setLocationMode(mode) {
+        locationMode = mode;
+        isManualModeActive = (mode === 'manual');
+        
+        // Update toggle buttons
+        document.getElementById('gpsToggle').classList.toggle('active', mode === 'gps');
+        document.getElementById('manualToggle').classList.toggle('active', mode === 'manual');
+        
+        // Enable/disable save button based on mode
+        const saveBtn = document.getElementById('saveBtn');
+        if (mode === 'manual') {
+            saveBtn.disabled = !manualPos;
+            saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> SAVE PROPERTY RECORD';
+            logger.addLogEntry("Switched to manual point selection mode", "info");
+        } else {
+            // GPS mode: button enabled only when accuracy is good
+            saveBtn.disabled = !(currentAccuracy && currentAccuracy >= 3 && currentAccuracy <= 15);
+            if (!saveBtn.disabled) {
+                saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> SAVE PROPERTY RECORD';
+            }
+            logger.addLogEntry("Switched to GPS auto mode", "info");
+        }
+        
+        // Clear accuracy layer in manual mode
+        if (mode === 'manual') {
+            accuracyLayer.clearLayers();
+        }
+        
+        // Update coordinates display
+        if (mode === 'gps' && currentPos) {
+            updateCoordinatesDisplay(currentPos[0], currentPos[1], 'GPS Location', currentAccuracy);
+        } else if (mode === 'manual' && manualPos) {
+            updateCoordinatesDisplay(manualPos[0], manualPos[1], 'Selected Point');
+        } else if (mode === 'manual') {
+            updateCoordinatesDisplay(null, null, 'Click on map to select a point');
+        }
+        
+        // Update cursor
+        document.getElementById('map').style.cursor = mode === 'manual' ? 'crosshair' : 'default';
+    }
+
+    // 10. MAP CLICK HANDLER FOR MANUAL POINT SELECTION
+    map.on('click', function(e) {
+        if (locationMode === 'manual' && isManualModeActive) {
+            manualPos = [e.latlng.lat, e.latlng.lng];
+            
+            // Remove previous manual marker
+            manualLayer.clearLayers();
+            
+            // Add new manual marker
+            manualMarker = L.marker(e.latlng, {
+                icon: L.divIcon({
+                    className: 'manual-marker',
+                    html: `<div style="
+                        width: 32px;
+                        height: 32px;
+                        background: rgba(142, 68, 173, 0.8);
+                        border: 3px solid white;
+                        border-radius: 50%;
+                        box-shadow: 0 0 10px rgba(142, 68, 173, 0.8);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-weight: bold;
+                    "><i class="fa-solid fa-map-pin"></i></div>`,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 32]
+                }),
+                zIndexOffset: 1000
+            }).addTo(manualLayer);
+            
+            // Update coordinates display
+            updateCoordinatesDisplay(manualPos[0], manualPos[1], 'Selected Point');
+            
+            // Enable save button and clear button
+            document.getElementById('saveBtn').disabled = false;
+            document.getElementById('clearPointBtn').disabled = false;
+            
+            // Center map on selected point
+            map.setView(e.latlng, Math.max(map.getZoom(), 16));
+            
+            logger.addLogEntry("Point selected on map: " + manualPos.map(c => c.toFixed(6)).join(", "), "info");
+        }
+    });
+
+    function clearManualPoint() {
+        manualPos = null;
+        manualMarker = null;
+        manualLayer.clearLayers();
+        document.getElementById('clearPointBtn').disabled = true;
+        document.getElementById('saveBtn').disabled = true;
+        updateCoordinatesDisplay(null, null, 'Click on map to select a point');
+        logger.addLogEntry("Manual point cleared", "info");
+    }
+
+    function updateCoordinatesDisplay(lat, lng, source, accuracy = null) {
+        const coordDisplay = document.getElementById('coordinates');
+        
+        if (lat !== null && lng !== null) {
+            let html = `<div><i class="fa-solid fa-map-pin"></i> ${source}</div>
+                <div style="color: #27ae60; font-weight: bold; margin-top: 3px;">
+                    ${lat.toFixed(6)}, ${lng.toFixed(6)}
+                </div>`;
+            
+            if (accuracy !== null) {
+                html += `<div style="font-size: 0.6rem; color: ${getAccuracyColor(accuracy)}; margin-top: 2px;">
+                    Accuracy: ${accuracy.toFixed(1)}m
+                </div>`;
+            }
+            
+            coordDisplay.innerHTML = html;
+        } else {
+            coordDisplay.innerHTML = `
+                <div><i class="fa-solid fa-info-circle"></i> ${source || 'Waiting for location...'}</div>
+                <div style="font-size: 0.6rem; color: #95a5a6; margin-top: 2px;">
+                    ${locationMode === 'gps' ? 'Waiting for GPS signal' : 'Click on map to select a point'}
+                </div>
+            `;
+        }
+    }
+
+    function getAccuracyColor(accuracy) {
+        if (accuracy >= 3 && accuracy <= 15) return '#27ae60';
+        if (accuracy < 3) return '#f39c12';
+        if (accuracy <= 30) return '#f39c12';
+        return '#e74c3c';
+    }
+
+    // 11. EVIDENCE PHOTO HANDLING
+    function capturePhoto() {
+        document.getElementById('photoInput').click();
+    }
+
+    function handlePhotoUpload(event) {
+        const file = event.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                evidencePhoto = e.target.result;
+                document.getElementById('imagePreview').src = evidencePhoto;
+                document.getElementById('imagePreview').style.display = 'block';
+                document.getElementById('removePhotoBtn').style.display = 'block';
+                logger.addLogEntry("Evidence photo captured: " + file.name, "success");
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function removePhoto() {
+        evidencePhoto = null;
+        document.getElementById('imagePreview').style.display = 'none';
+        document.getElementById('removePhotoBtn').style.display = 'none';
+        document.getElementById('photoInput').value = '';
+        logger.addLogEntry("Evidence photo removed", "info");
+    }
+
+    // 12. DATA SAVING FUNCTION WITH GPS ACCURACY VALIDATION
+    function saveData() {
+        let position;
+        let positionSource;
+        let accuracy = null;
+        
+        if (locationMode === 'gps') {
+            if (!currentPos) {
+                alert("Waiting for GPS signal...");
+                return;
+            }
+            
+            // Validate GPS accuracy
+            if (!currentAccuracy || currentAccuracy < 3 || currentAccuracy > 15) {
+                alert(`GPS accuracy (${currentAccuracy ? currentAccuracy.toFixed(1) : 'unknown'}m) is outside required range (3-15m).\n\nPlease move to an open area and wait for better GPS accuracy.`);
+                return;
+            }
+            
+            position = currentPos;
+            positionSource = 'GPS';
+            accuracy = currentAccuracy;
+        } else {
+            if (!manualPos) {
+                alert("Please select a point on the map first.");
+                return;
+            }
+            position = manualPos;
+            positionSource = 'Manual Selection';
         }
 
-        const price = document.getElementById('price').value;
-        const size = document.getElementById('size').value;
+        // Validate required fields
+        const propertyId = document.getElementById('propertyId').value.trim();
+        const propertyName = document.getElementById('propertyName').value.trim();
+        const district = document.getElementById('district').value.trim();
+        const county = document.getElementById('county').value.trim();
+        const subcounty = document.getElementById('subcounty').value.trim();
+        const parish = document.getElementById('parish').value.trim();
+        const village = document.getElementById('village').value.trim();
+        const price = parseFloat(document.getElementById('price').value);
+        const size = parseFloat(document.getElementById('size').value);
+        const landUse = document.getElementById('use').value;
+        
+        if (!propertyId) {
+            alert("Please enter Property ID.");
+            return;
+        }
+        
+        if (!propertyName) {
+            alert("Please enter Property Name.");
+            return;
+        }
+        
+        if (!district) {
+            alert("Please enter District.");
+            return;
+        }
+        
+        if (!price || !size || price <= 0 || size <= 0) {
+            alert("Please enter valid price and size values.");
+            return;
+        }
+        
+        if (!landUse) {
+            alert("Please select Land Use.");
+            return;
+        }
 
         const record = {
-            uid: Date.now(),
-            pId: document.getElementById('propId').value || "Unnamed",
-            block: document.getElementById('blk').value,
-            plot: document.getElementById('plt').value,
-            use: document.getElementById('landUse').value,
-            desc: document.getElementById('desc').value,
+            id: Date.now(),
+            date: new Date().toISOString(),
+            formattedDate: new Date().toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            }),
+            propertyId: propertyId,
+            propertyName: propertyName,
+            district: district,
+            county: county,
+            subcounty: subcounty,
+            parish: parish,
+            village: village,
+            landUse: landUse,
             price: price,
             size: size,
             rate: (price / size).toFixed(2),
-            lat: lat.toFixed(6), lng: lng.toFixed(6),
-            acc: manualPos ? "Manual" : currentPos.coords.accuracy.toFixed(1) + "m",
-            time: new Date().toLocaleString()
+            latitude: position[0].toFixed(6),
+            longitude: position[1].toFixed(6),
+            coordinates: `${position[0].toFixed(6)}, ${position[1].toFixed(6)}`,
+            evidence: evidencePhoto,
+            locationMode: locationMode,
+            positionSource: positionSource,
+            gpsAccuracy: accuracy ? accuracy.toFixed(1) : null
         };
 
-        const db = JSON.parse(localStorage.getItem('lavmis_db') || '[]');
+        let db = JSON.parse(localStorage.getItem('lavmis_pro_db') || '[]');
         db.push(record);
-        localStorage.setItem('lavmis_db', JSON.stringify(db));
+        localStorage.setItem('lavmis_pro_db', JSON.stringify(db));
+
+        plotPoint(record);
+        updateTable();
+        clearForm();
         
-        // --- CLEAR FORM LOGIC ---
-        ['propId', 'blk', 'plt', 'desc', 'price', 'size', 'photo'].forEach(id => {
-            document.getElementById(id).value = "";
-        });
-        document.getElementById('landUse').selectedIndex = 0;
+        // Clear manual point after saving
+        if (locationMode === 'manual') {
+            clearManualPoint();
+        }
         
-        // Reset Manual Mode
-        isManualMode = false; manualPos = null;
-        document.getElementById('manual-coords').innerText = "Using Real-time GPS";
-        document.getElementById('manual-coords').style.color = "";
+        // Log the action
+        const logMessage = `Property record saved: ${record.propertyName} (ID: ${record.propertyId}) - $${record.price} for ${record.size} Ha at ${record.coordinates}`;
+        logger.addLogEntry(logMessage, "success");
         
-        refreshUI();
-        alert("Property Saved & Logged!");
+        // Update storage display
+        storageManager.updateStorageDisplay();
+        
+        alert(`✅ Property record saved successfully!\n📋 ID: ${record.propertyId}\n🏠 Name: ${record.propertyName}\n📍 Location: ${record.coordinates}\n📏 Accuracy: ${accuracy ? accuracy.toFixed(1) + 'm' : 'Manual'}\n💰 Rate: $${record.rate}/Ha`);
     }
 
-    function refreshUI() {
-        const log = document.getElementById('dataLog');
-        log.innerHTML = "";
-        savedLayer.clearLayers();
-        const db = JSON.parse(localStorage.getItem('lavmis_db') || '[]');
+    function clearForm() {
+        document.getElementById('propertyId').value = '';
+        document.getElementById('propertyName').value = '';
+        document.getElementById('district').value = '';
+        document.getElementById('county').value = '';
+        document.getElementById('subcounty').value = '';
+        document.getElementById('parish').value = '';
+        document.getElementById('village').value = '';
+        document.getElementById('price').value = '';
+        document.getElementById('size').value = '';
+        document.getElementById('use').selectedIndex = 0;
+        removePhoto();
+    }
 
-        db.forEach(item => {
-            L.marker([item.lat, item.lng]).addTo(savedLayer)
-                .bindPopup(`
-                    <div style="min-width:200px">
-                        <b>${item.pId}</b><hr>
-                        Blk/Plt: ${item.block}/${item.plot}<br>
-                        Rate: $${item.rate}/Ha<br>
-                        ${item.photo ? `<img src="${item.photo}" style="width:100%; margin-top:8px; border-radius:4px;">` : ''}
-                    </div>
-                `);
-
-            const div = document.createElement('div');
-            div.className = 'log-item';
-            div.innerHTML = `<span><b>${item.pId}</b><br><small>${item.time}</small></span><i class="fa-solid fa-check-circle" style="color:var(--success)"></i>`;
-            div.onclick = () => { isFollowing = false; map.flyTo([item.lat, item.lng], 18); };
-            log.appendChild(div);
+    // 13. MAPPING FUNCTIONS
+    function plotPoint(record) {
+        const iconColor = getColorForUse(record.landUse);
+        const marker = L.marker([record.latitude, record.longitude], {
+            icon: L.divIcon({
+                className: 'saved-marker',
+                html: `<div style="
+                    width: 24px;
+                    height: 24px;
+                    background: ${iconColor};
+                    border: 2px solid white;
+                    border-radius: 50%;
+                    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-size: 10px;
+                "><i class="fa-solid fa-map-pin"></i></div>`,
+                iconSize: [24, 24],
+                iconAnchor: [12, 24]
+            }),
+            title: `${record.propertyName} - $${record.rate}/Ha`
+        }).addTo(savedLayer);
+        
+        let popupContent = `
+            <div style="min-width: 250px;">
+                <h4 style="margin: 0 0 10px 0; color: ${iconColor};">
+                    <i class="fa-solid fa-house"></i> ${record.propertyName}
+                </h4>
+                <p><strong>Property ID:</strong> ${record.propertyId}</p>
+                <p><strong>Location:</strong> ${record.village}, ${record.parish}</p>
+                <p><strong>Land Use:</strong> ${record.landUse}</p>
+                <p><strong>Price:</strong> $${record.price}</p>
+                <p><strong>Size:</strong> ${record.size} Ha</p>
+                <p><strong>Rate:</strong> $${record.rate}/Ha</p>
+                <p><strong>Date:</strong> ${record.formattedDate}</p>
+                <p><strong>Coordinates:</strong> ${record.coordinates}</p>
+                <p><strong>Source:</strong> ${record.positionSource}</p>
+                ${record.gpsAccuracy ? `<p><strong>GPS Accuracy:</strong> ${record.gpsAccuracy}m</p>` : ''}
+        `;
+        
+        if (record.evidence) {
+            popupContent += `
+                <p><strong>Evidence:</strong></p>
+                <img src="${record.evidence}" style="max-width: 150px; border-radius: 4px; margin-top: 5px;">
+            `;
+        }
+        
+        popupContent += `
+                <hr style="margin: 10px 0;">
+                <button onclick="showPreview(${record.id})" style="width: 100%; padding: 5px; background: ${iconColor}; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    View Property Details
+                </button>
+            </div>
+        `;
+        
+        marker.bindPopup(popupContent);
+        marker.recordId = record.id;
+        
+        marker.on('click', function() {
+            showPreview(record.id);
         });
     }
 
-    function exportExcel() {
-        const data = JSON.parse(localStorage.getItem('lavmis_db') || '[]');
-        if (data.length === 0) return alert("Nothing to export.");
-        const clean = data.map(({photo, uid, ...rest}) => rest);
-        const ws = XLSX.utils.json_to_sheet(clean);
+    function getColorForUse(landUse) {
+        const colors = {
+            'Residential': '#3498db',
+            'Commercial': '#e74c3c',
+            'Agricultural': '#27ae60',
+            'Industrial': '#f39c12',
+            'Recreational': '#9b59b6',
+            'Mixed Use': '#8e44ad',
+            'Vacant Land': '#95a5a6',
+            'Forest': '#16a085',
+            'Wetland': '#2980b9'
+        };
+        return colors[landUse] || '#3498db';
+    }
+
+    function clearAllMarkers() {
+        if (confirm("Are you sure you want to remove all property markers from the map? This won't delete your saved data.")) {
+            savedLayer.clearLayers();
+            // Replot all points from database
+            let db = JSON.parse(localStorage.getItem('lavmis_pro_db') || '[]');
+            db.forEach(plotPoint);
+            logger.addLogEntry("All property markers cleared", "warning");
+        }
+    }
+
+    // 14. DATA TABLE AND PREVIEW
+    function updateTable() {
+        const tbody = document.querySelector("#dataTable tbody");
+        tbody.innerHTML = "";
+        let db = JSON.parse(localStorage.getItem('lavmis_pro_db') || '[]');
+        
+        db.reverse().forEach(item => {
+            const row = tbody.insertRow();
+            row.dataset.id = item.id;
+            row.innerHTML = `
+                <td>${item.propertyId}</td>
+                <td>${item.propertyName}</td>
+                <td>$${item.rate}</td>
+                <td>
+                    <button onclick="goToLocation(${item.latitude}, ${item.longitude})" title="Go to property location">
+                        <i class="fa-solid fa-location-arrow"></i>
+                    </button>
+                    <button onclick="showPreview(${item.id})" title="View property details" style="margin-left: 5px;">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </td>
+            `;
+            
+            row.addEventListener('click', (e) => {
+                if (!e.target.tagName === 'BUTTON') {
+                    showPreview(item.id);
+                }
+            });
+        });
+    }
+
+    function goToLocation(lat, lng) {
+        map.setView([lat, lng], 18);
+        logger.addLogEntry(`Navigated to property coordinates: ${lat}, ${lng}`, "info");
+    }
+
+    function showPreview(recordId) {
+        const db = JSON.parse(localStorage.getItem('lavmis_pro_db') || '[]');
+        const record = db.find(r => r.id === recordId);
+        
+        if (!record) return;
+        
+        document.getElementById('previewContent').innerHTML = `
+            <div class="preview-item">
+                <div class="preview-label">Property ID:</div>
+                <div class="preview-value">${record.propertyId}</div>
+            </div>
+            <div class="preview-item">
+                <div class="preview-label">Property Name:</div>
+                <div class="preview-value">${record.propertyName}</div>
+            </div>
+            <div class="preview-item">
+                <div class="preview-label">District:</div>
+                <div class="preview-value">${record.district}</div>
+            </div>
+            <div class="preview-item">
+                <div class="preview-label">County:</div>
+                <div class="preview-value">${record.county}</div>
+            </div>
+            <div class="preview-item">
+                <div class="preview-label">Subcounty:</div>
+                <div class="preview-value">${record.subcounty}</div>
+            </div>
+            <div class="preview-item">
+                <div class="preview-label">Parish:</div>
+                <div class="preview-value">${record.parish}</div>
+            </div>
+            <div class="preview-item">
+                <div class="preview-label">Village:</div>
+                <div class="preview-value">${record.village}</div>
+            </div>
+            <div class="preview-item">
+                <div class="preview-label">Land Use:</div>
+                <div class="preview-value">${record.landUse}</div>
+            </div>
+            <div class="preview-item">
+                <div class="preview-label">Price:</div>
+                <div class="preview-value">$${record.price}</div>
+            </div>
+            <div class="preview-item">
+                <div class="preview-label">Size:</div>
+                <div class="preview-value">${record.size} Ha</div>
+            </div>
+            <div class="preview-item">
+                <div class="preview-label">Rate/Ha:</div>
+                <div class="preview-value">$${record.rate}</div>
+            </div>
+            <div class="preview-item">
+                <div class="preview-label">Coordinates:</div>
+                <div class="preview-value">${record.coordinates}</div>
+            </div>
+            <div class="preview-item">
+                <div class="preview-label">Date:</div>
+                <div class="preview-value">${record.formattedDate}</div>
+            </div>
+            <div class="preview-item">
+                <div class="preview-label">Location Source:</div>
+                <div class="preview-value">${record.positionSource}</div>
+            </div>
+            ${record.gpsAccuracy ? `
+            <div class="preview-item">
+                <div class="preview-label">GPS Accuracy:</div>
+                <div class="preview-value">${record.gpsAccuracy}m</div>
+            </div>
+            ` : ''}
+            ${record.evidence ? `
+                <div class="preview-item" style="grid-column: span 2;">
+                    <div class="preview-label">Evidence Photo:</div>
+                    <img src="${record.evidence}" style="max-width: 100%; max-height: 150px; margin-top: 5px; border-radius: 4px;">
+                </div>
+            ` : ''}
+        `;
+        
+        document.getElementById('dataPreview').style.display = 'block';
+        
+        // Scroll to preview
+        document.getElementById('dataPreview').scrollIntoView({ behavior: 'smooth' });
+        
+        // Center map on record location
+        map.setView([record.latitude, record.longitude], 16);
+        
+        logger.addLogEntry(`Viewing property record: ${record.propertyName} (ID: ${record.propertyId})`, "info");
+    }
+
+    function hidePreview() {
+        document.getElementById('dataPreview').style.display = 'none';
+    }
+
+    // 15. CACHE FUNCTIONS
+    function cacheTiles() {
+        logger.addLogEntry("Map caching started", "info");
+        alert("Scanning visible area... Keep the app open. Map tiles are being saved to your internal device storage.");
+        document.getElementById('cache-status').innerText = "Storage Status: Tiles Cached Locally";
+    }
+
+    function clearCache() {
+        if (confirm("Delete all cached map imagery?")) {
+            satellite.seed([], 0, 0);
+            logger.addLogEntry("Map cache cleared", "warning");
+            location.reload();
+        }
+    }
+
+    // 16. EXPORT FUNCTIONS
+    function exportData() {
+        const db = JSON.parse(localStorage.getItem('lavmis_pro_db') || '[]');
+        
+        // Prepare data for export with coordinates
+        const exportData = db.map(record => ({
+            'Property ID': record.propertyId,
+            'Property Name': record.propertyName,
+            'District': record.district,
+            'County': record.county,
+            'Subcounty': record.subcounty,
+            'Parish': record.parish,
+            'Village': record.village,
+            'Date': record.formattedDate,
+            'Land Use': record.landUse,
+            'Total Price ($)': record.price,
+            'Size (Ha)': record.size,
+            'Rate per Ha ($)': record.rate,
+            'Latitude': record.latitude,
+            'Longitude': record.longitude,
+            'Coordinates': record.coordinates,
+            'Location Source': record.positionSource,
+            'GPS Accuracy (m)': record.gpsAccuracy || 'N/A',
+            'Has Evidence': record.evidence ? 'Yes' : 'No'
+        }));
+        
+        const ws = XLSX.utils.json_to_sheet(exportData);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "ValuationAudit");
-        XLSX.writeFile(wb, `LAVMIS_Export_${Date.now()}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, ws, "PropertyData");
+        XLSX.writeFile(wb, `LAVMIS_Properties_${new Date().toISOString().slice(0,10)}.xlsx`);
+        
+        logger.addLogEntry("Property data exported to Excel", "success");
     }
 
-    window.addEventListener('online',  () => { document.getElementById('net-status').innerText = "ONLINE"; document.getElementById('net-status').className = "status-box good"; });
-    window.addEventListener('offline', () => { document.getElementById('net-status').innerText = "OFFLINE"; document.getElementById('net-status').className = "status-box warn"; });
+    function exportGeoJSON() {
+        const db = JSON.parse(localStorage.getItem('lavmis_pro_db') || '[]');
+        
+        const geoJson = {
+            type: "FeatureCollection",
+            features: db.map(record => ({
+                type: "Feature",
+                geometry: {
+                    type: "Point",
+                    coordinates: [parseFloat(record.longitude), parseFloat(record.latitude)]
+                },
+                properties: {
+                    id: record.id,
+                    propertyId: record.propertyId,
+                    propertyName: record.propertyName,
+                    district: record.district,
+                    county: record.county,
+                    subcounty: record.subcounty,
+                    parish: record.parish,
+                    village: record.village,
+                    date: record.formattedDate,
+                    landUse: record.landUse,
+                    price: record.price,
+                    size: record.size,
+                    rate: record.rate,
+                    coordinates: record.coordinates,
+                    source: record.positionSource,
+                    accuracy: record.gpsAccuracy,
+                    hasEvidence: !!record.evidence
+                }
+            }))
+        };
+        
+        const blob = new Blob([JSON.stringify(geoJson, null, 2)], { type: 'application/json' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `lavmis_properties_${new Date().toISOString().slice(0,10)}.geojson`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+        
+        logger.addLogEntry("Property data exported to GeoJSON", "success");
+    }
+
+    // 17. BACKUP/RESTORE FUNCTIONS
+    function backupData(format) {
+        storageManager.backupData(format);
+    }
+
+    function restoreData() {
+        const fileInput = document.getElementById('restoreFile');
+        if (fileInput.files.length === 0) {
+            alert("Please select a backup file first.");
+            return;
+        }
+        
+        if (confirm("This will replace ALL current property data. Are you sure?")) {
+            storageManager.restoreData(fileInput.files[0]);
+            hideModal();
+        }
+    }
+
+    function clearAllData() {
+        storageManager.clearAllData();
+    }
+
+    function clearLog() {
+        logger.clearLog();
+    }
+
+    // 18. INITIALIZATION
+    window.onload = () => {
+        // Add initial log entry
+        logger.addLogEntry("LAVMIS Pro started - Property Data Capture", "info");
+        
+        // Load saved data
+        let db = JSON.parse(localStorage.getItem('lavmis_pro_db') || '[]');
+        db.forEach(plotPoint);
+        updateTable();
+        
+        // Initialize location mode
+        setLocationMode('gps');
+        
+        // Start GPS tracking
+        startGPS();
+        
+        // Initialize auto-center button
+        document.getElementById('autoCenterToggle').classList.add('active');
+        
+        // Update storage display
+        storageManager.updateStorageDisplay();
+        
+        // Auto-center on GPS after a short delay
+        setTimeout(() => {
+            if (currentPos) {
+                map.setView(currentPos, 16);
+                logger.addLogEntry("Auto-centered map on GPS location", "info");
+            }
+        }, 1000);
+    };
     
-    window.onload = refreshUI;
+    // Clean up GPS watch on page unload
+    window.addEventListener('beforeunload', function() {
+        if (gpsWatchId !== null) {
+            navigator.geolocation.clearWatch(gpsWatchId);
+        }
+        logger.addLogEntry("LAVMIS Pro session ended", "info");
+    });
 </script>
+
 </body>
 </html>
