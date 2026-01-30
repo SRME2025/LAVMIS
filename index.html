@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LAVMIS Pro | Offline Satellite</title>
+    <title>LAVMIS DATA COLLECTOR MODULE | Offline Satellite</title>
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -492,6 +492,45 @@
             border-bottom: 1px solid #4a6278;
             padding-bottom: 5px;
         }
+        
+        /* Danger confirmation modal styles */
+        .danger-confirmation {
+            z-index: 5000;
+        }
+        
+        .danger-modal {
+            background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+            border: 3px solid #e74c3c;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(231, 76, 60, 0.5);
+            animation: danger-pulse 2s infinite;
+        }
+        
+        @keyframes danger-pulse {
+            0% { box-shadow: 0 0 20px rgba(231, 76, 60, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(231, 76, 60, 0.8); }
+            100% { box-shadow: 0 0 20px rgba(231, 76, 60, 0.5); }
+        }
+        
+        .danger-modal h3 {
+            color: #e74c3c !important;
+            border-bottom: 2px solid #e74c3c;
+            padding-bottom: 10px;
+            text-align: center;
+        }
+        
+        .danger-btn {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%) !important;
+            color: white !important;
+            font-weight: bold !important;
+            border: none !important;
+        }
+        
+        .danger-btn:disabled {
+            opacity: 0.5 !important;
+            cursor: not-allowed !important;
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%) !important;
+        }
     </style>
 </head>
 <body>
@@ -499,7 +538,7 @@
 <div id="sidebar">
     <div class="status-bar">
         <span id="net-label" class="indicator on">ONLINE</span>
-        <span style="font-size: 1.2rem; font-weight: bold; color: var(--valuation);">LAVMIS PRO</span>
+        <span style="font-size: 1.2rem; font-weight: bold; color: var(--valuation);">LAVMIS DATA COLLECTOR MODULE</span>
     </div>
 
     <div class="panel">
@@ -1099,38 +1138,112 @@
         }
         
         clearAllData() {
-            if (confirm("Are you sure you want to delete ALL property data, logs, and markers? This cannot be undone!")) {
-                // Backup current data first
-                const db = localStorage.getItem('lavmis_pro_db');
-                const logs = localStorage.getItem('lavmis_logs');
-                
-                // Store backup in memory for undo
-                sessionStorage.setItem('last_backup_db', db);
-                sessionStorage.setItem('last_backup_logs', logs);
-                
-                // Clear all data
-                localStorage.removeItem('lavmis_pro_db');
-                localStorage.removeItem('lavmis_logs');
-                
-                // Clear map
-                savedLayer.clearLayers();
-                liveLayer.clearLayers();
-                manualLayer.clearLayers();
-                accuracyLayer.clearLayers();
-                
-                // Update UI
-                updateTable();
-                logger.logContainer.innerHTML = '';
-                logger.addLogEntry("All property data cleared", "warning");
-                this.updateStorageDisplay();
-                
-                // Show undo option
-                setTimeout(() => {
-                    if (confirm("Property data cleared. Click OK to undo, or Cancel to keep cleared data.")) {
-                        this.undoClear();
-                    }
-                }, 100);
+            // First confirmation
+            if (!confirm("⚠️ WARNING: This will delete ALL property data, logs, and markers!\n\nThis includes:\n• All saved property records\n• All activity logs\n• All map markers\n• All evidence photos\n\nThis action CANNOT be undone!\n\nClick OK to proceed or Cancel to abort.")) {
+                logger.addLogEntry("Clear All Data action cancelled by user", "warning");
+                return;
             }
+            
+            // Second confirmation with custom modal
+            this.showDangerConfirmation(
+                "FINAL CONFIRMATION REQUIRED",
+                "You are about to permanently delete ALL data. This action cannot be undone. To proceed, type 'DELETE ALL' in the field below.",
+                "Delete All Data",
+                () => {
+                    // Backup current data first
+                    const db = localStorage.getItem('lavmis_pro_db');
+                    const logs = localStorage.getItem('lavmis_logs');
+                    
+                    // Store backup in memory for undo
+                    sessionStorage.setItem('last_backup_db', db);
+                    sessionStorage.setItem('last_backup_logs', logs);
+                    
+                    // Clear all data
+                    localStorage.removeItem('lavmis_pro_db');
+                    localStorage.removeItem('lavmis_logs');
+                    
+                    // Clear map
+                    savedLayer.clearLayers();
+                    liveLayer.clearLayers();
+                    manualLayer.clearLayers();
+                    accuracyLayer.clearLayers();
+                    
+                    // Update UI
+                    updateTable();
+                    logger.logContainer.innerHTML = '';
+                    logger.addLogEntry("🔥 ALL PROPERTY DATA CLEARED - This action was intentionally confirmed by user", "error");
+                    this.updateStorageDisplay();
+                    
+                    // Show undo option
+                    setTimeout(() => {
+                        const undo = confirm("✅ All data has been cleared successfully!\n\nYou have a brief window to UNDO this action.\n\nClick OK to UNDO (restore data)\nClick Cancel to keep data cleared");
+                        
+                        if (undo) {
+                            this.undoClear();
+                        } else {
+                            logger.addLogEntry("Data clearing confirmed - no undo requested", "warning");
+                            // Clear the backup from session storage
+                            sessionStorage.removeItem('last_backup_db');
+                            sessionStorage.removeItem('last_backup_logs');
+                        }
+                    }, 100);
+                }
+            );
+        }
+        
+        showDangerConfirmation(title, message, confirmText, callback) {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay danger-confirmation';
+            modal.style.display = 'flex';
+            modal.style.zIndex = '5000';
+            
+            modal.innerHTML = `
+                <div class="modal danger-modal">
+                    <h3><i class="fa-solid fa-triangle-exclamation"></i> ${title}</h3>
+                    <p style="margin: 20px 0; font-size: 0.9rem; line-height: 1.5; color: #ecf0f1;">${message}</p>
+                    
+                    <div class="field-group" style="margin: 20px 0;">
+                        <label for="confirmationInput">Type <span style="color: #e74c3c; font-weight: bold;">DELETE ALL</span> to confirm:</label>
+                        <input type="text" id="confirmationInput" placeholder="Type DELETE ALL here" 
+                               style="text-align: center; font-weight: bold; border: 2px solid #e74c3c;">
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px;">
+                        <button onclick="this.closest('.modal-overlay').remove()" class="secondary">
+                            <i class="fa-solid fa-times"></i> Cancel
+                        </button>
+                        <button id="confirmDangerBtn" class="danger-btn" disabled>
+                            <i class="fa-solid fa-check"></i> ${confirmText}
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            const input = document.getElementById('confirmationInput');
+            const confirmBtn = document.getElementById('confirmDangerBtn');
+            
+            input.addEventListener('input', function() {
+                confirmBtn.disabled = this.value !== 'DELETE ALL';
+            });
+            
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && this.value === 'DELETE ALL') {
+                    callback();
+                    modal.remove();
+                }
+            });
+            
+            confirmBtn.addEventListener('click', function() {
+                if (input.value === 'DELETE ALL') {
+                    callback();
+                    modal.remove();
+                }
+            });
+            
+            // Focus on input
+            setTimeout(() => input.focus(), 100);
         }
         
         undoClear() {
