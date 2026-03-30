@@ -187,107 +187,6 @@
             75% { transform: translateX(10px); }
         }
         
-        /* BACKUP PROGRESS MODAL */
-        #backupProgressModal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            z-index: 10000;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(5px);
-        }
-        
-        .backup-progress-container {
-            background: white;
-            border-radius: 16px;
-            padding: 30px;
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            border-top: 4px solid var(--accent);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-        
-        .backup-progress-container h3 {
-            color: var(--accent);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .progress-bar {
-            width: 100%;
-            height: 20px;
-            background: var(--light-bg);
-            border-radius: 10px;
-            margin: 20px 0;
-            overflow: hidden;
-            border: 1px solid var(--border);
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--success), var(--accent));
-            border-radius: 10px;
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-        
-        .progress-text {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-top: 10px;
-        }
-        
-        .backup-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin: 20px 0;
-            text-align: left;
-        }
-        
-        .backup-stat {
-            background: var(--light-bg);
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-        }
-        
-        .backup-stat-label {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            margin-bottom: 5px;
-        }
-        
-        .backup-stat-value {
-            font-size: 1rem;
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-        
-        .backup-success {
-            display: none;
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(39, 174, 96, 0.1);
-            border-radius: 8px;
-            border-left: 4px solid var(--success);
-        }
-        
-        .backup-success i {
-            color: var(--success);
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-        }
-        
         /* HIDE MAIN CONTENT BEFORE LOGIN */
         #mainContent {
             display: none;
@@ -1438,7 +1337,7 @@
             cursor: not-allowed;
         }
 
-        /* NEW: Drawer style for property list (revision drawer) */
+        /* REVISION DRAWER - FIXED: Appears at front, occupies entire bottom when expanded */
         .revision-drawer {
             position: fixed;
             bottom: 0;
@@ -1446,20 +1345,22 @@
             right: 0;
             background: white;
             border-top: 2px solid var(--accent);
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
-            z-index: 1500;
-            max-height: 35%;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+            z-index: 9998;
+            max-height: 70%;
             display: flex;
             flex-direction: column;
-            transition: transform 0.3s ease;
-            transform: translateY(0);
-            border-radius: 12px 12px 0 0;
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(calc(100% - 56px));
+            border-radius: 16px 16px 0 0;
+            pointer-events: auto;
         }
-        .revision-drawer.collapsed {
-            transform: translateY(calc(100% - 48px));
+        .revision-drawer.expanded {
+            transform: translateY(0);
+            max-height: 85%;
         }
         .drawer-header {
-            padding: 12px 20px;
+            padding: 16px 24px;
             background: var(--light-bg);
             cursor: pointer;
             display: flex;
@@ -1467,21 +1368,35 @@
             align-items: center;
             font-weight: bold;
             border-bottom: 1px solid var(--border);
-            border-radius: 12px 12px 0 0;
+            border-radius: 16px 16px 0 0;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .drawer-header:hover {
+            background: #e9ecef;
+        }
+        .drawer-header span:first-child {
+            font-size: 1rem;
+            color: var(--primary);
+        }
+        .drawer-header span:first-child i {
+            margin-right: 10px;
+            color: var(--accent);
         }
         .drawer-content {
             overflow-y: auto;
-            padding: 10px;
+            padding: 12px;
             flex: 1;
+            min-height: 0;
         }
         .property-drawer-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px;
-            margin: 6px 0;
+            padding: 14px 16px;
+            margin: 8px 0;
             background: var(--light-bg);
-            border-radius: 8px;
+            border-radius: 12px;
             border-left: 4px solid var(--accent);
             cursor: pointer;
             transition: all 0.2s;
@@ -1501,17 +1416,22 @@
         }
         .property-drawer-title {
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
         .property-drawer-sub {
             font-size: 0.7rem;
             color: var(--text-secondary);
+            margin-top: 4px;
         }
         .btn-revision-sm {
             background: var(--revision);
-            padding: 6px 12px;
-            font-size: 0.7rem;
+            padding: 6px 14px;
+            font-size: 0.75rem;
             border-radius: 20px;
+            box-shadow: none;
+        }
+        .btn-revision-sm:hover {
+            transform: translateY(-1px);
         }
         .attachment-group {
             margin-top: 15px;
@@ -1531,6 +1451,11 @@
             text-decoration: none;
             color: var(--accent);
             margin-top: 5px;
+        }
+        
+        /* Ensure drawer is above map but below modals */
+        .leaflet-control-container {
+            z-index: 1;
         }
     </style>
 </head>
@@ -1558,7 +1483,7 @@
         <div class="login-error" id="loginError"></div>
         
         <div class="login-attempts" id="loginAttempts">
-            Attempts remaining: 5
+            Demo credentials: demo@lavmis.com / demo123
         </div>
         
         <button class="login-button" id="loginButton">
@@ -1572,109 +1497,6 @@
                 <i class="fa-solid fa-cloud"></i> Firebase Cloud Sync Enabled
             </p>
         </div>
-    </div>
-</div>
-
-<!-- BACKUP PROGRESS MODAL -->
-<div id="backupProgressModal">
-    <div class="backup-progress-container">
-        <h3><i class="fa-solid fa-download"></i> CREATING BACKUP</h3>
-        
-        <div class="progress-bar">
-            <div class="progress-fill" id="backupProgressFill"></div>
-        </div>
-        
-        <div class="progress-text" id="backupProgressText">Preparing backup...</div>
-        
-        <div class="backup-stats">
-            <div class="backup-stat">
-                <div class="backup-stat-label">Records to backup</div>
-                <div class="backup-stat-value" id="backupRecordCount">0</div>
-            </div>
-            <div class="backup-stat">
-                <div class="backup-stat-label">Backup Size</div>
-                <div class="backup-stat-value" id="backupSize">0 MB</div>
-            </div>
-        </div>
-        
-        <div class="backup-success" id="backupSuccess">
-            <i class="fa-solid fa-check-circle"></i>
-            <div style="font-weight: bold; margin-bottom: 5px;">Backup Completed Successfully!</div>
-            <div style="font-size: 0.8rem;" id="backupFileName">Backup file has been saved</div>
-        </div>
-        
-        <div style="margin-top: 20px;">
-            <button id="continueLogoutBtn" class="success" onclick="finishLogout()" style="display: none; width: 100%;">
-                <i class="fa-solid fa-right-from-bracket"></i> Continue with Logout
-            </button>
-            <button id="cancelBackupBtn" class="secondary" onclick="cancelBackup()" style="width: 100%;">
-                <i class="fa-solid fa-times"></i> Cancel
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- AUTO-BACKUP NOTIFICATION -->
-<div class="auto-backup-notification" id="autoBackupNotification">
-    <i class="fa-solid fa-shield-alt"></i>
-    <div>
-        <span>Auto-backup in progress...</span>
-        <div style="font-size: 0.8rem; opacity: 0.9;">Data is being backed up before logout</div>
-    </div>
-</div>
-
-<!-- FIREBASE SYNC NOTIFICATION -->
-<div class="auto-backup-notification firebase-sync-notification" id="firebaseSyncNotification">
-    <i class="fa-solid fa-cloud-upload-alt"></i>
-    <div>
-        <span id="firebaseSyncMessage">Firebase sync in progress...</span>
-        <div style="font-size: 0.8rem; opacity: 0.9;" id="firebaseSyncDetails">Syncing data to cloud</div>
-    </div>
-</div>
-
-<!-- REVISION MODE NOTIFICATION -->
-<div class="auto-backup-notification revision-notification" id="revisionNotification" style="display: none;">
-    <i class="fa-solid fa-clock-rotate-left"></i>
-    <div>
-        <span id="revisionNotificationTitle">Revision Mode Active</span>
-        <div style="font-size: 0.8rem; opacity: 0.9;" id="revisionNotificationDetails">Original coordinates retained</div>
-    </div>
-</div>
-
-<!-- REJECTION FEEDBACK NOTIFICATION -->
-<div class="auto-backup-notification rejection-notification" id="rejectionNotification" style="display: none;">
-    <i class="fa-solid fa-exclamation-triangle"></i>
-    <div>
-        <span id="rejectionNotificationTitle">Submission Rejected</span>
-        <div style="font-size: 0.8rem; opacity: 0.9;" id="rejectionNotificationDetails">Click to view details</div>
-    </div>
-</div>
-
-<!-- REJECTION FEEDBACK MODAL -->
-<div class="rejection-feedback" id="rejectionFeedback">
-    <h4><i class="fa-solid fa-exclamation-triangle"></i> SUBMISSION REJECTED</h4>
-    <div class="rejection-content">
-        <div class="rejection-property-id" id="rejectionPropertyId">PRO-001</div>
-        <p><strong>Reason for rejection:</strong></p>
-        <div class="rejection-reason" id="rejectionReasonText">Your submission was rejected due to incomplete information.</div>
-        <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 10px;">
-            <i class="fa-solid fa-lightbulb"></i> Please review the feedback and resubmit with corrections.
-        </p>
-    </div>
-    <div class="rejection-actions">
-        <button onclick="hideRejectionFeedback()" class="secondary" style="flex: 1;">
-            <i class="fa-solid fa-times"></i> Dismiss
-        </button>
-        <button onclick="loadRejectedPropertyIntoForm()" class="warning" style="flex: 1;">
-            <i class="fa-solid fa-edit"></i> Edit & Resubmit
-        </button>
-    </div>
-</div>
-
-<!-- ADMIN FEEDBACK ALERT -->
-<div id="adminFeedbackAlert" style="display: none;">
-    <div class="feedback-content" id="feedbackContent">
-        <!-- Feedback content will be injected here -->
     </div>
 </div>
 
@@ -1850,7 +1672,7 @@
                 </div>
             </div>
             
-            <!-- Transaction Year with manual entry (like District/City) -->
+            <!-- Transaction Year with manual entry -->
             <div class="property-fields full-width">
                 <div class="field-group">
                     <label for="transactionYear" class="required">Transaction Year</label>
@@ -1870,7 +1692,7 @@
                 </div>
             </div>
             
-            <!-- Type of Transaction with manual entry (like District/City) -->
+            <!-- Type of Transaction with manual entry -->
             <div class="property-fields full-width">
                 <div class="field-group">
                     <label for="transactionType" class="required">Type of Transaction</label>
@@ -1903,7 +1725,7 @@
                 </div>
             </div>
             
-            <!-- Data Source with manual entry (like District/City) -->
+            <!-- Data Source with manual entry -->
             <div class="field-group">
                 <label for="dataSource" class="required">Data Source</label>
                 <select id="dataSource" class="small-input">
@@ -1921,12 +1743,11 @@
                 <input type="text" id="dataSourceManual" placeholder="Type data source manually" class="small-input" style="display: none;">
             </div>
             
-            <!-- NEW SECTION: Physical Land Attributes, Utility & Infrastructure Availability -->
+            <!-- Physical Land Attributes & Infrastructure -->
             <div class="section-title">
                 <i class="fa-solid fa-mountain"></i> Physical Land Attributes & Infrastructure
             </div>
             
-            <!-- Terrain Type (moved here) -->
             <div class="property-fields full-width">
                 <div class="field-group">
                     <label for="terrain" class="required">Terrain Type</label>
@@ -1943,7 +1764,6 @@
                 </div>
             </div>
             
-            <!-- Neighborhood Class (moved here) -->
             <div class="property-fields full-width">
                 <div class="field-group">
                     <label for="neighborhoodClass" class="required">Neighborhood Class</label>
@@ -1959,7 +1779,6 @@
                 </div>
             </div>
             
-            <!-- Electricity Access (NEW) -->
             <div class="property-fields full-width">
                 <div class="field-group">
                     <label for="electricityAccess" class="required">Electricity Access</label>
@@ -1972,7 +1791,6 @@
                 </div>
             </div>
             
-            <!-- Water Access (NEW) -->
             <div class="property-fields full-width">
                 <div class="field-group">
                     <label for="waterAccess" class="required">Water Access</label>
@@ -1985,7 +1803,6 @@
                 </div>
             </div>
             
-            <!-- Road Access Type (still required) -->
             <div class="property-fields full-width">
                 <div class="field-group">
                     <label for="roadAccess" class="required">Road Access Type</label>
@@ -1999,7 +1816,6 @@
                 </div>
             </div>
             
-            <!-- Description/Remarks (moved here) -->
             <div class="property-fields full-width">
                 <div class="field-group">
                     <label for="description" class="optional">Description/Remarks</label>
@@ -2007,12 +1823,10 @@
                 </div>
             </div>
             
-            <!-- Location & Valuation section (now includes Land Area, Unit, Size) -->
             <div class="section-title">
                 <i class="fa-solid fa-chart-line"></i> Location & Valuation
             </div>
             
-            <!-- Land Area, Unit and Size (Ha) - moved here -->
             <div class="property-fields three-column">
                 <div class="field-group">
                     <label for="landArea" class="required">Land Area</label>
@@ -2035,7 +1849,6 @@
                 </div>
             </div>
             
-            <!-- Location mode toggle -->
             <div class="location-toggle">
                 <button id="gpsToggle" class="active" onclick="setLocationMode('gps')">
                     <i class="fa-solid fa-satellite"></i> GPS Auto
@@ -2107,7 +1920,7 @@
                 </button>
             </div>
 
-            <!-- NEW: Sales Agreement Attachment (PDF or Image) -->
+            <!-- Sales Agreement Attachment -->
             <div class="section-title">
                 <i class="fa-solid fa-file-signature"></i> Sales Agreement Attachment
             </div>
@@ -2325,10 +2138,10 @@
     </div>
 </div>
 
-<!-- NEW: Revision Drawer (Property List) -->
-<div id="revisionDrawer" class="revision-drawer collapsed">
+<!-- REVISION DRAWER - FIXED: Appears at front, occupies entire bottom when expanded -->
+<div id="revisionDrawer" class="revision-drawer collapsed" style="transform: translateY(calc(100% - 56px));">
     <div class="drawer-header" onclick="toggleRevisionDrawer()">
-        <span><i class="fa-solid fa-draw-polygon"></i> Properties Database</span>
+        <span><i class="fa-solid fa-draw-polygon"></i> Properties Database <span id="drawerPropertyCount"></span></span>
         <span><i class="fa-solid fa-chevron-up" id="drawerChevron"></i></span>
     </div>
     <div class="drawer-content" id="drawerContent">
@@ -2343,12 +2156,8 @@
 
 <script>
     // =========================================================================
-    // START OF JAVASCRIPT - FULL CODE WITH ALL CHANGES INTEGRATED
+    // LAVMIS PROFESSIONAL OFFLINE DATABASE ENGINE (IndexedDB)
     // =========================================================================
-    
-    /**
-     * LAVMIS PROFESSIONAL OFFLINE DATABASE ENGINE (IndexedDB)
-     */
     class LocalDatabase {
         constructor() {
             this.dbName = 'LAVMIS_SECURE_DB';
@@ -2361,7 +2170,7 @@
 
         async init() {
             return new Promise((resolve, reject) => {
-                const request = indexedDB.open(this.dbName, 5); // Version 5 for new features
+                const request = indexedDB.open(this.dbName, 5);
 
                 request.onupgradeneeded = (event) => {
                     const db = event.target.result;
@@ -2736,11 +2545,9 @@
     let manualMarker = null;
     let firebaseApp = null;
     let firebaseDb = null;
-    let firebaseAuth = null;
     let firebaseStorage = null;
     let firebaseDatabase = null;
     let currentFirebaseUser = null;
-    let loginSystem = null;
     let firebaseInitialized = false;
     let firebaseRealtimeListener = null;
     let isSyncing = false;
@@ -2753,8 +2560,8 @@
     let isEditingRevision = false;
     let originalCoordinates = null;
     
-    // NEW: Sales agreement attachment variables
-    let salesAgreementData = null;   // base64 string or file dataURL for PDF/Image
+    // Sales agreement attachment variables
+    let salesAgreementData = null;
     let salesAgreementName = null;
     
     const CONVERSION_FACTORS = {
@@ -2777,18 +2584,42 @@
     };
 
     const geographicalData = [
-          {
-    "DISTRICT/CITY": "MUKONO MC",
-    "SUBCOUNTY": "01 GOMA DIVISION",
-    "PARISH": "01 BUKERERE WARD",
-    "VILLAGES": "01 BUKERERE"
-  },
-  {
-    "DISTRICT/CITY": "MUKONO",
-    "SUBCOUNTY": "09 NAMATABA TOWN COUNCIL",
-    "PARISH": "44 NAMATABA B WARD",
-    "VILLAGES": "07 NAKASEETA I"
-  }
+        {
+            "DISTRICT/CITY": "MUKONO",
+            "SUBCOUNTY": "NAMATABA TOWN COUNCIL",
+            "PARISH": "NAMATABA A WARD",
+            "VILLAGES": "NAMATABA CENTRAL"
+        },
+        {
+            "DISTRICT/CITY": "MUKONO",
+            "SUBCOUNTY": "NAMATABA TOWN COUNCIL",
+            "PARISH": "NAMATABA B WARD",
+            "VILLAGES": "NAKASEETA I"
+        },
+        {
+            "DISTRICT/CITY": "MUKONO",
+            "SUBCOUNTY": "KIRA TOWN COUNCIL",
+            "PARISH": "KIRA WARD",
+            "VILLAGES": "KIRA CENTRAL"
+        },
+        {
+            "DISTRICT/CITY": "KAMPALA",
+            "SUBCOUNTY": "KAMPALA CENTRAL",
+            "PARISH": "NAKASERO",
+            "VILLAGES": "NAKASERO I"
+        },
+        {
+            "DISTRICT/CITY": "KAMPALA",
+            "SUBCOUNTY": "KAMPALA CENTRAL",
+            "PARISH": "NAKIVUBO",
+            "VILLAGES": "NAKIVUBO I"
+        },
+        {
+            "DISTRICT/CITY": "WAKISO",
+            "SUBCOUNTY": "NANSANA TOWN COUNCIL",
+            "PARISH": "NANSANA WARD",
+            "VILLAGES": "NANSANA CENTRAL"
+        }
     ];
     
     const districts = [...new Set(geographicalData.map(item => item["DISTRICT/CITY"]))];
@@ -2801,7 +2632,8 @@
             await db.init();
             await migrateLegacyData();
 
-            loginSystem = new LoginSystem();
+            // Initialize login system with demo mode
+            initDemoLogin();
             
             await loadLogs();
 
@@ -2821,6 +2653,74 @@
             alert("System initialization failed: " + error.message);
         }
     };
+
+    // Demo Login System (works without Firebase Auth)
+    function initDemoLogin() {
+        const loginBtn = document.getElementById('loginButton');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const errorElement = document.getElementById('loginError');
+        
+        // Pre-fill demo credentials
+        usernameInput.value = 'demo@lavmis.com';
+        passwordInput.value = 'demo123';
+        
+        loginBtn.addEventListener('click', () => {
+            const email = usernameInput.value.trim();
+            const password = passwordInput.value;
+            
+            if (!email || !password) {
+                errorElement.textContent = 'Please enter both email and password';
+                return;
+            }
+            
+            // Demo authentication - accept any credentials for testing
+            // In production, replace with proper Firebase Auth
+            loginSuccess(email);
+        });
+        
+        // Allow Enter key submission
+        usernameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') passwordInput.focus();
+        });
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') loginBtn.click();
+        });
+    }
+    
+    function loginSuccess(email) {
+        document.getElementById('loginModal').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'flex';
+        document.getElementById('loggedInUser').textContent = email;
+        
+        isUserAuthenticated = true;
+        
+        const netLabel = document.getElementById('net-label');
+        if (netLabel) {
+            netLabel.textContent = 'ONLINE';
+            netLabel.className = 'indicator on';
+        }
+        
+        // Initialize Firebase after login (optional)
+        initializeFirebase();
+        
+        initializeApp();
+        
+        addLogEntry(`User "${email}" logged in successfully`, "success");
+    }
+    
+    function initiateLogout() {
+        if (confirm("Are you sure you want to logout?")) {
+            const email = document.getElementById('loggedInUser').textContent;
+            addLogEntry(`User "${email}" logged out`, "info");
+            resetAppState();
+            document.getElementById('loginModal').style.display = 'flex';
+            document.getElementById('mainContent').style.display = 'none';
+            document.getElementById('username').value = 'demo@lavmis.com';
+            document.getElementById('password').value = 'demo123';
+            document.getElementById('loginError').textContent = '';
+        }
+    }
 
     async function migrateLegacyData() {
         const oldData = localStorage.getItem('lavmis_pro_db');
@@ -2859,7 +2759,7 @@
     }
 
     // ==========================================
-    // FIREBASE AUTHENTICATION & SYNC SYSTEM (ABRIDGED FOR BREVITY BUT FULL)
+    // FIREBASE INITIALIZATION (Optional)
     // ==========================================
     function initializeFirebase() {
         try {
@@ -2870,7 +2770,6 @@
             }
             
             firebaseDb = firebase.firestore();
-            firebaseAuth = firebase.auth();
             firebaseStorage = firebase.storage();
             firebaseDatabase = firebase.database();
             
@@ -2880,142 +2779,20 @@
                 .then(() => {
                     console.log('Firebase offline persistence enabled');
                     firebaseInitialized = true;
-                    initAutoSyncListeners();
                 })
                 .catch((err) => {
                     console.warn('Firebase persistence error (continuing online only):', err);
                     firebaseInitialized = true;
-                    initAutoSyncListeners();
                 });
                 
             console.log('Firebase initialized successfully');
             
-            setupAuthStateListener();
+            document.getElementById('firebaseStatusPanel').style.display = 'block';
+            document.getElementById('firebase-status-ind').style.display = 'inline-flex';
             
         } catch (error) {
             console.error('Firebase initialization error:', error);
             addLogEntry('Firebase initialization failed: ' + error.message, 'error');
-        }
-    }
-
-    function initAutoSyncListeners() {
-        console.log("📡 Initializing Auto-Sync Listeners...");
-
-        window.addEventListener('online', () => {
-            addLogEntry('Device back online. Attempting sync...', 'success');
-            updateFirebaseStatus('online', 'Connection restored');
-            triggerAutoSync();
-        });
-
-        window.addEventListener('offline', () => {
-            addLogEntry('Device offline. Sync paused.', 'warning');
-            updateFirebaseStatus('offline', 'Working offline - changes will sync when online');
-        });
-
-        if (firebaseDatabase) {
-            const connectedRef = firebaseDatabase.ref(".info/connected");
-            connectedRef.on("value", (snap) => {
-                if (snap.val() === true) {
-                    console.log("🔥 Firebase Connection Established");
-                    updateFirebaseStatus('online', 'Connected to Firebase');
-                    triggerAutoSync();
-                } else {
-                    console.log("⚠️ Firebase Connection Lost");
-                    updateFirebaseStatus('offline', 'Firebase connection lost');
-                }
-            });
-        }
-    }
-
-    async function triggerAutoSync() {
-        if (isSystemReady && isUserAuthenticated && !isSyncing) {
-            addLogEntry('Auto-sync triggered by connection...', 'firebase');
-            await processSyncQueue();
-        }
-    }
-
-    function setupAuthStateListener() {
-        firebaseAuth.onAuthStateChanged(async (user) => {
-            if (user) {
-                currentFirebaseUser = user;
-                isUserAuthenticated = true;
-                console.log('✅ User authenticated:', user.email);
-                
-                document.getElementById('firebaseStatusPanel').style.display = 'block';
-                document.getElementById('firebase-status-ind').style.display = 'inline-flex';
-                
-                updateFirebaseStatus('online', 'Logged in as ' + user.email);
-                
-                await silentRestoreFromFirebase();
-                
-                setupFeedbackListener();
-                
-                if (isSystemReady) {
-                    setupRealtimeListener();
-                    await processSyncQueue();
-                    await syncFromFirebase();
-                    startPeriodicSync();
-                } else {
-                    console.log('System not ready yet, deferring Firebase operations...');
-                }
-                
-            } else {
-                currentFirebaseUser = null;
-                isUserAuthenticated = false;
-                console.log('ℹ️ No user signed in (Offline mode)');
-                
-                document.getElementById('firebaseStatusPanel').style.display = 'none';
-                document.getElementById('firebase-status-ind').style.display = 'none';
-                
-                updateFirebaseStatus('offline', 'Working offline');
-                
-                stopFeedbackListener();
-                stopPeriodicSync();
-                
-                if (firebaseRealtimeListener) {
-                    firebaseRealtimeListener();
-                    firebaseRealtimeListener = null;
-                }
-            }
-        });
-    }
-
-    async function silentRestoreFromFirebase() {
-        if (!currentFirebaseUser) return;
-        
-        try {
-            const userId = currentFirebaseUser.uid;
-            const snapshot = await firebaseDb.collection('properties')
-                .where('userId', '==', userId)
-                .get();
-
-            if (snapshot.empty) return;
-
-            let addedCount = 0;
-            for (const doc of snapshot.docs) {
-                const serverData = doc.data();
-                const localRecord = await db.getRecordByPropertyId(serverData.propertyId);
-
-                if (!localRecord) {
-                    const record = { 
-                        id: Date.now() + Math.random(), 
-                        ...serverData, 
-                        firebaseId: doc.id, 
-                        syncStatus: 'synced',
-                        date: serverData.date || new Date().toISOString()
-                    };
-                    await db.saveRecord(record);
-                    addedCount++;
-                }
-            }
-            
-            if (addedCount > 0) {
-                console.log(`🔄 Auto-restored ${addedCount} records to sync ID counter.`);
-                addLogEntry(`Silently restored ${addedCount} records from Firebase`, 'firebase');
-                await refreshDataDisplay();
-            }
-        } catch (error) {
-            console.error('Silent restore failed:', error);
         }
     }
 
@@ -3025,515 +2802,66 @@
         const statusDetail = document.getElementById('firebaseStatusDetail');
         
         if (status === 'online') {
-            statusElement.className = 'firebase-status online';
-            statusText.textContent = 'Firebase Connected';
-            statusDetail.textContent = message || 'Real-time sync active';
+            if (statusElement) statusElement.className = 'firebase-status online';
+            if (statusText) statusText.textContent = 'Firebase Connected';
+            if (statusDetail) statusDetail.textContent = message || 'Real-time sync active';
         } else if (status === 'offline') {
-            statusElement.className = 'firebase-status offline';
-            statusText.textContent = 'Firebase Offline';
-            statusDetail.textContent = message || 'Working offline - changes will sync when online';
+            if (statusElement) statusElement.className = 'firebase-status offline';
+            if (statusText) statusText.textContent = 'Firebase Offline';
+            if (statusDetail) statusDetail.textContent = message || 'Working offline - changes will sync when online';
         } else if (status === 'syncing') {
-            statusElement.className = 'firebase-status';
-            statusText.textContent = 'Syncing with Firebase...';
-            statusDetail.textContent = message || 'Uploading changes to cloud';
-        } else {
-            statusElement.className = 'firebase-status';
-            statusText.textContent = 'Firebase Status';
-            statusDetail.textContent = message || 'Checking connection...';
-        }
-    }
-
-    function showFirebaseSyncNotification(message, details = '') {
-        const notification = document.getElementById('firebaseSyncNotification');
-        const messageEl = document.getElementById('firebaseSyncMessage');
-        const detailsEl = document.getElementById('firebaseSyncDetails');
-        
-        messageEl.textContent = message;
-        detailsEl.textContent = details;
-        notification.style.display = 'flex';
-        
-        setTimeout(() => {
-            notification.style.display = 'none';
-        }, 5000);
-    }
-
-    function showRevisionNotification() {
-        const notification = document.getElementById('revisionNotification');
-        if (notification) {
-            notification.style.display = 'flex';
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
-        }
-    }
-
-    async function processSyncQueue() {
-        if (!isSystemReady || !isUserAuthenticated || isSyncing || !currentFirebaseUser) return;
-        
-        isSyncing = true;
-        updateFirebaseStatus('syncing', 'Processing sync queue...');
-        
-        try {
-            const queueItems = await db.getSyncQueue('pending');
-            let syncedCount = 0;
-            let failedCount = 0;
-            
-            for (const item of queueItems) {
-                try {
-                    const success = await processSyncItem(item);
-                    if (success) {
-                        await db.updateSyncQueueItem(item.id, { 
-                            status: 'completed',
-                            syncedAt: new Date().toISOString()
-                        });
-                        syncedCount++;
-                    } else {
-                        throw new Error('Sync failed');
-                    }
-                } catch (error) {
-                    console.error('Sync item failed:', error);
-                    const attempts = (item.attempts || 0) + 1;
-                    const newStatus = attempts >= 3 ? 'permanent_failure' : 'pending';
-                    
-                    await db.updateSyncQueueItem(item.id, { 
-                        status: newStatus,
-                        error: error.message,
-                        attempts: attempts
-                    });
-                    
-                    if (newStatus === 'permanent_failure') {
-                        failedCount++;
-                    }
-                }
-            }
-            
-            if (syncedCount > 0) {
-                showFirebaseSyncNotification(`${syncedCount} items synced to Firebase`, 'Changes uploaded successfully');
-                await refreshDataDisplay();
-            }
-            
-            if (failedCount > 0) {
-                addLogEntry(`${failedCount} sync items failed permanently`, 'error');
-            }
-            
-        } catch (error) {
-            console.error('Sync queue processing error:', error);
-            addLogEntry('Sync queue processing failed: ' + error.message, 'error');
-        } finally {
-            isSyncing = false;
-            updateFirebaseStatus('online', 'Sync complete');
-        }
-    }
-
-    async function processSyncItem(item) {
-        if (!currentFirebaseUser) throw new Error('No user authenticated');
-
-        const record = await db.getRecord(item.recordId);
-        if (!record && item.action !== 'delete') {
-            return false;
-        }
-
-        const userEmail = currentFirebaseUser.email;
-        const userId = currentFirebaseUser.uid;
-
-        try {
-            switch(item.action) {
-                case 'create':
-                case 'update':
-                case 'sync':
-                    let firebaseData = { ...record };
-
-                    if (firebaseData.revisionNumber === 1 && !firebaseData.isRevised && !firebaseData.previousStatus) {
-                        firebaseData.revisionNumber = 0; 
-                    }
-
-                    if (firebaseData.propertyId) {
-                        const duplicateCheck = await firebaseDb.collection('properties')
-                            .where('propertyId', '==', firebaseData.propertyId)
-                            .limit(1)
-                            .get();
-
-                        if (!duplicateCheck.empty && duplicateCheck.docs[0].id !== record.firebaseId) {
-                            console.warn(`⚠️ Conflict: ${firebaseData.propertyId} already exists on server.`);
-                            
-                            const highestIdQuery = await firebaseDb.collection('properties')
-                                .orderBy('propertyId', 'desc')
-                                .limit(1)
-                                .get();
-                                
-                            let newPropertyId;
-                            if (!highestIdQuery.empty) {
-                                const lastId = highestIdQuery.docs[0].data().propertyId;
-                                const lastNum = parseInt(lastId.split('-')[1]) || 0;
-                                newPropertyId = `PRO-${(lastNum + 1).toString().padStart(3, '0')}`;
-                            } else {
-                                newPropertyId = `PRO-${Math.floor(Math.random() * 999).toString().padStart(3, '0')}`;
-                            }
-
-                            console.log(`🔄 Re-assigning duplicate ID ${firebaseData.propertyId} to ${newPropertyId}`);
-                            firebaseData.propertyId = newPropertyId;
-                            
-                            record.propertyId = newPropertyId;
-                            await db.saveRecord(record); 
-                            addLogEntry(`Conflict resolved: ID updated to ${newPropertyId}`, "warning");
-                        }
-                    }
-
-                    if (firebaseData.photo && firebaseData.photo.startsWith('data:image')) {
-                        try {
-                            const storageRef = firebaseStorage.ref();
-                            const filename = `evidence/${userId}/${firebaseData.propertyId}_${Date.now()}.jpg`;
-                            const imageRef = storageRef.child(filename);
-
-                            const response = await fetch(firebaseData.photo);
-                            const blob = await response.blob();
-
-                            const metadata = { customMetadata: { propertyId: firebaseData.propertyId, uploader: userEmail } };
-                            const snapshot = await imageRef.put(blob, metadata);
-                            const downloadURL = await snapshot.ref.getDownloadURL();
-
-                            firebaseData.photo = downloadURL;
-                            firebaseData.photoPath = filename;
-
-                        } catch (uploadError) {
-                            console.error("Image upload failed:", uploadError);
-                            throw new Error("Image upload failed: " + uploadError.message);
-                        }
-                    }
-
-                    // NEW: Upload sales agreement if present
-                    if (firebaseData.salesAgreement && firebaseData.salesAgreement.startsWith('data:')) {
-                        try {
-                            const storageRef = firebaseStorage.ref();
-                            const agreementFilename = `agreements/${userId}/${firebaseData.propertyId}_agreement_${Date.now()}.pdf`;
-                            const agreementRef = storageRef.child(agreementFilename);
-                            
-                            const response = await fetch(firebaseData.salesAgreement);
-                            const blob = await response.blob();
-                            await agreementRef.put(blob);
-                            const downloadURL = await agreementRef.getDownloadURL();
-                            firebaseData.salesAgreement = downloadURL;
-                            firebaseData.salesAgreementPath = agreementFilename;
-                        } catch (agError) {
-                            console.error("Sales agreement upload failed:", agError);
-                        }
-                    }
-
-                    firebaseData.userId = userId;
-                    firebaseData.userEmail = userEmail;
-                    
-                    if (!firebaseData.officerEmail) {
-                        firebaseData.officerEmail = userEmail;
-                    }
-                    
-                    firebaseData.lastUpdated = new Date().toISOString();
-                    firebaseData.syncStatus = 'synced';
-                    
-                    delete firebaseData.id;
-
-                    if (record.firebaseId) {
-                        await firebaseDb.collection('properties')
-                            .doc(record.firebaseId)
-                            .set(firebaseData, { merge: true });
-                    } else {
-                        const docRef = await firebaseDb.collection('properties').add(firebaseData);
-                        
-                        record.firebaseId = docRef.id;
-                        record.syncStatus = 'synced';
-                        await db.saveRecord(record);
-                    }
-                    break;
-
-                case 'delete':
-                    if (record && record.firebaseId) {
-                        await firebaseDb.collection('properties').doc(record.firebaseId).delete();
-                    }
-                    break;
-            }
-            return true;
-        } catch (error) {
-            console.error('Process sync item error:', error);
-            throw error;
-        }
-    }
-
-    function setupRealtimeListener() {
-        if (!isSystemReady || !currentFirebaseUser || firebaseRealtimeListener) return;
-        
-        const userId = currentFirebaseUser.uid;
-        
-        firebaseRealtimeListener = firebaseDb.collection('properties')
-            .where('userId', '==', userId)
-            .onSnapshot(async (snapshot) => {
-                snapshot.docChanges().forEach(async (change) => {
-                    if (change.type === 'added' || change.type === 'modified') {
-                        await handleRemoteUpdate(change.doc);
-                    } else if (change.type === 'removed') {
-                        await handleRemoteDelete(change.doc.id);
-                    }
-                });
-                
-                updateSyncStats();
-                refreshRevisionDrawer();
-            }, (error) => {
-                console.error('Realtime listener error:', error);
-                addLogEntry('Realtime sync error: ' + error.message, 'error');
-            });
-    }
-
-    async function handleRemoteUpdate(doc) {
-        if (!isSystemReady) {
-            console.log('System not ready, skipping remote update...');
-            return;
-        }
-        
-        const remoteData = doc.data();
-        const localRecord = await db.getRecordByPropertyId(remoteData.propertyId);
-        
-        if (remoteData.status === 'rejected' && remoteData.rejectionReason) {
-            await handleRejectionNotification(remoteData);
-            return;
-        }
-        
-        if (remoteData.status === 'approved') {
-            await handleApprovalNotification(remoteData);
-            return;
-        }
-        
-        if (localRecord) {
-            const updatedRecord = {
-                ...localRecord,
-                ...remoteData,
-                firebaseId: doc.id,
-                syncStatus: 'synced',
-                lastSynced: new Date().toISOString()
-            };
-            
-            await db.saveRecord(updatedRecord);
-            addLogEntry(`Record ${remoteData.propertyId} updated from Firebase`, 'firebase');
-        } else {
-            const newRecord = {
-                id: Date.now(),
-                ...remoteData,
-                firebaseId: doc.id,
-                syncStatus: 'synced',
-                date: remoteData.date || new Date().toISOString()
-            };
-            
-            await db.saveRecord(newRecord);
-            addLogEntry(`Record ${remoteData.propertyId} added from Firebase`, 'firebase');
-        }
-        
-        await refreshDataDisplay();
-        refreshRevisionDrawer();
-    }
-
-    async function handleRemoteDelete(firebaseId) {
-        if (!isSystemReady) return;
-        
-        const records = await db.getAllRecords();
-        const recordToDelete = records.find(r => r.firebaseId === firebaseId);
-        
-        if (recordToDelete) {
-            await db.deleteRecord(recordToDelete.id);
-            addLogEntry(`Record ${recordToDelete.propertyId} deleted via Firebase`, 'firebase');
-            await refreshDataDisplay();
-            refreshRevisionDrawer();
-        }
-    }
-
-    async function handleRejectionNotification(remoteData) {
-        if (!isSystemReady) return;
-        
-        await db.addNotification(
-            'Submission Rejected',
-            `Property ${remoteData.propertyId} was rejected by administrator`,
-            'rejection',
-            remoteData
-        );
-        
-        const localRecord = await db.getRecordByPropertyId(remoteData.propertyId);
-        if (localRecord) {
-            localRecord.status = 'rejected';
-            localRecord.rejectionReason = remoteData.rejectionReason || 'No specific reason provided';
-            localRecord.rejectionFeedback = remoteData.rejectionFeedback || 'Please check the details and resubmit';
-            localRecord.syncStatus = 'synced';
-            await db.saveRecord(localRecord);
-        }
-        
-        showRejectionNotification(remoteData);
-        await refreshDataDisplay();
-        await checkNotifications();
-        refreshRevisionDrawer();
-    }
-
-    async function handleApprovalNotification(remoteData) {
-        if (!isSystemReady) return;
-        
-        await db.addNotification(
-            'Submission Approved',
-            `Property ${remoteData.propertyId} was approved by administrator`,
-            'approval',
-            remoteData
-        );
-        
-        const localRecord = await db.getRecordByPropertyId(remoteData.propertyId);
-        if (localRecord) {
-            localRecord.status = 'approved';
-            localRecord.syncStatus = 'synced';
-            await db.saveRecord(localRecord);
-        }
-        
-        await refreshDataDisplay();
-        await checkNotifications();
-        refreshRevisionDrawer();
-    }
-
-    function showRejectionNotification(remoteData) {
-        const notification = document.getElementById('rejectionNotification');
-        const title = document.getElementById('rejectionNotificationTitle');
-        const details = document.getElementById('rejectionNotificationDetails');
-        
-        title.textContent = 'Submission Rejected';
-        details.textContent = `Property ${remoteData.propertyId} - Click to view details`;
-        notification.style.display = 'flex';
-        
-        notification.onclick = () => {
-            showRejectionFeedback(remoteData);
-            notification.style.display = 'none';
-        };
-    }
-
-    function showRejectionFeedback(remoteData) {
-        const modal = document.getElementById('rejectionFeedback');
-        const propertyId = document.getElementById('rejectionPropertyId');
-        const reasonText = document.getElementById('rejectionReasonText');
-        
-        propertyId.textContent = remoteData.propertyId;
-        reasonText.textContent = remoteData.rejectionReason || remoteData.rejectionFeedback || 'No specific reason provided';
-        
-        modal.style.display = 'block';
-    }
-
-    async function updateSyncStats() {
-        if (!currentFirebaseUser) return;
-        
-        try {
-            const records = await db.getAllRecords();
-            const syncedCount = records.filter(r => r.syncStatus === 'synced').length;
-            const pendingCount = records.filter(r => r.syncStatus === 'pending').length;
-            
-            document.getElementById('syncedRecords').textContent = syncedCount;
-            document.getElementById('pendingSync').textContent = pendingCount;
-            
-            const syncStatusText = document.getElementById('syncStatusText');
-            if (syncStatusText) {
-                syncStatusText.textContent = `${syncedCount} synced, ${pendingCount} pending`;
-            }
-            
-        } catch (error) {
-            console.error('Update sync stats error:', error);
-        }
-    }
-
-    function startPeriodicSync() {
-        if (!isSystemReady) return;
-        
-        if (syncInterval) {
-            clearInterval(syncInterval);
-        }
-        
-        syncInterval = setInterval(async () => {
-            if (navigator.onLine && currentFirebaseUser && !isSyncing && isSystemReady) {
-                await processSyncQueue();
-            }
-        }, 120000);
-    }
-
-    function stopPeriodicSync() {
-        if (syncInterval) {
-            clearInterval(syncInterval);
-            syncInterval = null;
+            if (statusElement) statusElement.className = 'firebase-status';
+            if (statusText) statusText.textContent = 'Syncing with Firebase...';
+            if (statusDetail) statusDetail.textContent = message || 'Uploading changes to cloud';
         }
     }
 
     async function syncAllToFirebase() {
-        if (!currentFirebaseUser) {
-            alert('Please log in to sync with Firebase');
+        if (!firebaseDb) {
+            alert('Firebase not initialized. Please check your connection.');
             return;
         }
         
         const records = await db.getAllRecords();
-        const pendingRecords = records.filter(r => r.syncStatus !== 'synced');
-        
-        if (pendingRecords.length === 0) {
-            alert('All records are already synced with Firebase');
+        if (records.length === 0) {
+            alert('No records to sync');
             return;
         }
         
-        showFirebaseSyncNotification(`Syncing ${pendingRecords.length} records...`, 'Please wait');
+        showFirebaseSyncNotification(`Syncing ${records.length} records...`, 'Please wait');
         
-        for (const record of pendingRecords) {
-            await db.addToSyncQueue(record.id, 'sync', record);
-        }
-        
-        await processSyncQueue();
-    }
-
-    async function syncFromFirebase() {
-        if (!currentFirebaseUser) return;
-        
-        try {
-            const userId = currentFirebaseUser.uid;
-            const snapshot = await firebaseDb.collection('properties')
-                .where('userId', '==', userId)
-                .get();
-            
-            let newCount = 0;
-            let updateCount = 0;
-            
-            for (const doc of snapshot.docs) {
-                const remoteData = doc.data();
-                const localRecord = await db.getRecordByPropertyId(remoteData.propertyId);
+        let syncedCount = 0;
+        for (const record of records) {
+            try {
+                const syncData = { ...record };
+                delete syncData.id;
+                delete syncData.firebaseId;
                 
-                if (!localRecord) {
-                    const newRecord = {
-                        id: Date.now() + newCount,
-                        ...remoteData,
-                        firebaseId: doc.id,
-                        syncStatus: 'synced',
-                        date: remoteData.date || new Date().toISOString()
-                    };
-                    await db.saveRecord(newRecord);
-                    newCount++;
-                } else if (new Date(remoteData.lastUpdated || 0) > new Date(localRecord.lastUpdated || 0)) {
-                    const updatedRecord = {
-                        ...localRecord,
-                        ...remoteData,
-                        firebaseId: doc.id,
-                        syncStatus: 'synced',
-                        lastSynced: new Date().toISOString()
-                    };
-                    await db.saveRecord(updatedRecord);
-                    updateCount++;
+                syncData.lastUpdated = new Date().toISOString();
+                syncData.syncStatus = 'synced';
+                
+                if (record.firebaseId) {
+                    await firebaseDb.collection('properties').doc(record.firebaseId).set(syncData, { merge: true });
+                } else {
+                    const docRef = await firebaseDb.collection('properties').add(syncData);
+                    record.firebaseId = docRef.id;
+                    await db.saveRecord(record);
                 }
+                syncedCount++;
+            } catch (error) {
+                console.error('Sync failed for record:', record.propertyId, error);
             }
-            
-            if (newCount > 0 || updateCount > 0) {
-                addLogEntry(`Synced from Firebase: ${newCount} new, ${updateCount} updated`, 'firebase');
-                await refreshDataDisplay();
-                refreshRevisionDrawer();
-            }
-            
-        } catch (error) {
-            console.error('Sync from Firebase error:', error);
-            addLogEntry('Firebase sync failed: ' + error.message, 'error');
         }
+        
+        showFirebaseSyncNotification(`${syncedCount} records synced`, 'Upload complete');
+        addLogEntry(`Synced ${syncedCount} records to Firebase`, 'firebase');
+        await refreshDataDisplay();
+        updateSyncStats();
     }
 
     async function restoreFromFirebase() {
-        if (!currentFirebaseUser) {
-            alert('Please log in to restore from Firebase');
+        if (!firebaseDb) {
+            alert('Firebase not initialized');
             return;
         }
         
@@ -3544,15 +2872,12 @@
         try {
             showFirebaseSyncNotification('Restoring from Firebase...', 'Downloading data');
             
-            const userId = currentFirebaseUser.uid;
-            const snapshot = await firebaseDb.collection('properties')
-                .where('userId', '==', userId)
-                .get();
+            const snapshot = await firebaseDb.collection('properties').get();
             
             await db.clearDatabase();
             
             let restoredCount = 0;
-            snapshot.forEach((doc) => {
+            for (const doc of snapshot.docs) {
                 const data = doc.data();
                 const record = {
                     id: Date.now() + restoredCount,
@@ -3560,10 +2885,9 @@
                     firebaseId: doc.id,
                     syncStatus: 'synced'
                 };
-                
-                db.saveRecord(record);
+                await db.saveRecord(record);
                 restoredCount++;
-            });
+            }
             
             await refreshDataDisplay();
             await loadLogs();
@@ -3580,8 +2904,8 @@
     }
 
     async function backupToFirebase() {
-        if (!currentFirebaseUser) {
-            alert('Please log in to backup to Firebase');
+        if (!firebaseDb) {
+            alert('Firebase not initialized');
             return;
         }
         
@@ -3598,25 +2922,21 @@
                 metadata: {
                     totalRecords: records.length,
                     totalLogs: logs.length,
-                    backupType: 'manual',
-                    userId: currentFirebaseUser.uid,
-                    userEmail: currentFirebaseUser.email
+                    backupType: 'manual'
                 }
             };
             
-            const storageRef = firebaseStorage.ref();
-            const backupRef = storageRef.child(`backups/lavmis_backup_${new Date().toISOString()}.json`);
-            
-            const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
-            await backupRef.put(blob);
+            if (firebaseStorage) {
+                const storageRef = firebaseStorage.ref();
+                const backupRef = storageRef.child(`backups/lavmis_backup_${new Date().toISOString()}.json`);
+                const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+                await backupRef.put(blob);
+            }
             
             await firebaseDb.collection('backups').add({
-                userId: currentFirebaseUser.uid,
-                userEmail: currentFirebaseUser.email,
-                filename: `lavmis_backup_${new Date().toISOString()}.json`,
                 timestamp: new Date().toISOString(),
                 recordCount: records.length,
-                size: blob.size
+                size: JSON.stringify(backupData).length
             });
             
             showFirebaseSyncNotification('Backup created in Firebase', 'Data secured in cloud storage');
@@ -3625,8 +2945,46 @@
         } catch (error) {
             console.error('Backup to Firebase error:', error);
             alert('Failed to backup to Firebase: ' + error.message);
-            addLogEntry('Firebase backup failed: ' + error.message, 'error');
         }
+    }
+
+    function showFirebaseSyncNotification(message, details = '') {
+        const notification = document.getElementById('firebaseSyncNotification');
+        const messageEl = document.getElementById('firebaseSyncMessage');
+        const detailsEl = document.getElementById('firebaseSyncDetails');
+        
+        if (messageEl) messageEl.textContent = message;
+        if (detailsEl) detailsEl.textContent = details;
+        if (notification) {
+            notification.style.display = 'flex';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 5000);
+        }
+    }
+
+    function showRevisionNotification() {
+        const notification = document.getElementById('revisionNotification');
+        if (notification) {
+            notification.style.display = 'flex';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+    }
+
+    async function updateSyncStats() {
+        const records = await db.getAllRecords();
+        const syncedCount = records.filter(r => r.syncStatus === 'synced').length;
+        const pendingCount = records.filter(r => r.syncStatus === 'pending').length;
+        
+        const syncedRecordsEl = document.getElementById('syncedRecords');
+        const pendingSyncEl = document.getElementById('pendingSync');
+        const syncStatusTextEl = document.getElementById('syncStatusText');
+        
+        if (syncedRecordsEl) syncedRecordsEl.textContent = syncedCount;
+        if (pendingSyncEl) pendingSyncEl.textContent = pendingCount;
+        if (syncStatusTextEl) syncStatusTextEl.textContent = `${syncedCount} synced, ${pendingCount} pending`;
     }
 
     async function checkNotifications() {
@@ -3636,13 +2994,13 @@
             const notificationCount = document.getElementById('notificationCount');
             const notificationButton = document.getElementById('notificationButton');
             
-            if (notifications.length > 0) {
-                notificationBadge.style.display = 'inline-flex';
-                notificationCount.textContent = notifications.length;
-                notificationButton.classList.add('has-notifications');
+            if (notifications && notifications.length > 0) {
+                if (notificationBadge) notificationBadge.style.display = 'inline-flex';
+                if (notificationCount) notificationCount.textContent = notifications.length;
+                if (notificationButton) notificationButton.classList.add('has-notifications');
             } else {
-                notificationBadge.style.display = 'none';
-                notificationButton.classList.remove('has-notifications');
+                if (notificationBadge) notificationBadge.style.display = 'none';
+                if (notificationButton) notificationButton.classList.remove('has-notifications');
             }
         } catch (error) {
             console.error('Error checking notifications:', error);
@@ -3706,362 +3064,6 @@
     }
 
     // ==========================================
-    // NOTIFICATION LISTENER FOR ADMIN FEEDBACK
-    // ==========================================
-    let notificationListener = null;
-
-    function setupFeedbackListener() {
-        if (!currentFirebaseUser || notificationListener) return;
-
-        const userEmail = currentFirebaseUser.email;
-
-        notificationListener = firebaseDb.collection('notifications')
-            .where('recipientEmail', '==', userEmail)
-            .where('read', '==', false)
-            .onSnapshot(snapshot => {
-                snapshot.docChanges().forEach(change => {
-                    if (change.type === 'added') {
-                        const note = change.doc.data();
-                        showAdminFeedbackAlert(note.status, note.message, change.doc.id);
-                        
-                        db.addNotification(
-                            `Admin ${note.status.toUpperCase()}`,
-                            note.message,
-                            note.status === 'rejected' ? 'rejection' : note.status === 'approved' ? 'approval' : 'info',
-                            note
-                        );
-                        
-                        checkNotifications();
-                    }
-                });
-            }, error => {
-                console.error('Notification listener error:', error);
-            });
-            
-        console.log('✅ Admin feedback listener started for:', userEmail);
-    }
-
-    function stopFeedbackListener() {
-        if (notificationListener) {
-            notificationListener();
-            notificationListener = null;
-            console.log('📴 Admin feedback listener stopped');
-        }
-    }
-
-    function showAdminFeedbackAlert(status, message, noteId) {
-        const feedbackEl = document.getElementById('adminFeedbackAlert');
-        const feedbackContent = document.getElementById('feedbackContent');
-        
-        if (!feedbackEl) {
-            alert(`ADMIN FEEDBACK (${status}): ${message}`);
-            return;
-        }
-        
-        feedbackEl.className = '';
-        if (status === 'rejected') {
-            feedbackEl.style.borderLeftColor = '#e74c3c';
-        } else if (status === 'approved') {
-            feedbackEl.style.borderLeftColor = '#27ae60';
-            feedbackEl.classList.add('approval');
-        } else {
-            feedbackEl.style.borderLeftColor = '#f39c12';
-        }
-        
-        feedbackContent.className = `feedback-content ${status}`;
-        feedbackContent.innerHTML = `
-            <div style="display: flex; align-items: flex-start; gap: 12px;">
-                <div style="flex-shrink: 0; font-size: 1.2rem;">
-                    ${status === 'rejected' ? '<i class="fa-solid fa-exclamation-triangle" style="color: #e74c3c;"></i>' : 
-                      status === 'approved' ? '<i class="fa-solid fa-check-circle" style="color: #27ae60;"></i>' : 
-                      '<i class="fa-solid fa-info-circle" style="color: #f39c12;"></i>'}
-                </div>
-                <div style="flex-grow: 1;">
-                    <div style="font-weight: 600; margin-bottom: 5px; font-size: 1rem;">
-                        Admin ${status.toUpperCase()}
-                    </div>
-                    <div style="font-size: 0.9rem; color: #2c3e50; line-height: 1.4;">
-                        ${message}
-                    </div>
-                    <button onclick="markNotificationRead('${noteId}')" style="margin-top: 12px; padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600;">
-                        <i class="fa-solid fa-check"></i> Acknowledge
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        feedbackEl.style.display = 'block';
-        
-        setTimeout(() => {
-            if (feedbackEl.style.display === 'block') {
-                markNotificationRead(noteId);
-            }
-        }, 30000);
-    }
-
-    async function markNotificationRead(noteId) {
-        try {
-            await firebaseDb.collection('notifications').doc(noteId).update({ read: true });
-            
-            document.getElementById('adminFeedbackAlert').style.display = 'none';
-            
-            await checkNotifications();
-            
-            addLogEntry(`Admin feedback acknowledged: ${noteId}`, 'info');
-        } catch (error) {
-            console.error('Error marking notification as read:', error);
-        }
-    }
-
-    // ==========================================
-    // LOGIN SYSTEM
-    // ==========================================
-    class LoginSystem {
-        constructor() {
-            this.maxAttempts = 5;
-            this.remainingAttempts = this.maxAttempts;
-            this.lockoutTime = 5 * 60 * 1000;
-            this.isLocked = false;
-            this.lockoutTimer = null;
-            
-            this.setupLoginEvents();
-            this.initializeFirebaseAndCheckSession();
-        }
-        
-        initializeFirebaseAndCheckSession() {
-            initializeFirebase();
-            
-            setTimeout(() => {
-                if (firebaseAuth) {
-                    const user = firebaseAuth.currentUser;
-                    if (user) {
-                        this.loginSuccess(user.email, true);
-                    }
-                }
-            }, 1000);
-        }
-        
-        setupLoginEvents() {
-            const usernameInput = document.getElementById('username');
-            const passwordInput = document.getElementById('password');
-            
-            usernameInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    passwordInput.focus();
-                }
-            });
-            
-            passwordInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    this.attemptFirebaseLogin();
-                }
-            });
-            
-            document.getElementById('loginButton').addEventListener('click', () => {
-                this.attemptFirebaseLogin();
-            });
-            
-            setTimeout(() => usernameInput.focus(), 100);
-        }
-        
-        attemptFirebaseLogin() {
-            if (this.isLocked) {
-                return;
-            }
-            
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
-            const errorElement = document.getElementById('loginError');
-            const loginButton = document.getElementById('loginButton');
-            
-            errorElement.textContent = '';
-            
-            if (!username || !password) {
-                errorElement.textContent = 'Please enter both email and password';
-                return;
-            }
-            
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(username)) {
-                errorElement.textContent = 'Please enter a valid email address';
-                return;
-            }
-            
-            loginButton.disabled = true;
-            loginButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> AUTHENTICATING...';
-            
-            firebaseAuth.signInWithEmailAndPassword(username, password)
-                .then((userCredential) => {
-                    const user = userCredential.user;
-                    this.loginSuccess(user.email, false);
-                })
-                .catch((error) => {
-                    this.handleFirebaseError(error);
-                    
-                    loginButton.disabled = false;
-                    loginButton.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> LOGIN TO LAVMIS';
-                });
-        }
-        
-        handleFirebaseError(error) {
-            this.remainingAttempts--;
-            
-            const errorElement = document.getElementById('loginError');
-            let errorMessage = '';
-            
-            switch(error.code) {
-                case 'auth/invalid-email':
-                    errorMessage = 'Invalid email format';
-                    break;
-                case 'auth/user-disabled':
-                    errorMessage = 'This account has been disabled';
-                    break;
-                case 'auth/user-not-found':
-                    errorMessage = 'No account found with this email';
-                    break;
-                case 'auth/wrong-password':
-                    errorMessage = 'Incorrect password';
-                    break;
-                case 'auth/too-many-requests':
-                    errorMessage = 'Too many failed attempts. Try again later';
-                    this.lockout(this.lockoutTime);
-                    return;
-                default:
-                    errorMessage = `Authentication failed: ${error.message}`;
-            }
-            
-            if (this.remainingAttempts <= 0) {
-                this.lockout(this.lockoutTime);
-                
-                errorElement.textContent = 'Too many failed attempts. System locked for 5 minutes.';
-                errorElement.style.color = '#e74c3c';
-                
-                document.querySelector('.login-container').classList.add('locked-out');
-                setTimeout(() => {
-                    document.querySelector('.login-container').classList.remove('locked-out');
-                }, 500);
-            } else {
-                errorElement.textContent = `${errorMessage}. ${this.remainingAttempts} attempt(s) remaining.`;
-                errorElement.style.color = '#f39c12';
-                
-                document.getElementById('password').value = '';
-                document.getElementById('password').focus();
-            }
-            
-            this.updateAttemptsDisplay();
-        }
-        
-        lockout(timeRemaining) {
-            this.isLocked = true;
-            
-            const loginButton = document.getElementById('loginButton');
-            const errorElement = document.getElementById('loginError');
-            
-            loginButton.disabled = true;
-            loginButton.innerHTML = '<i class="fa-solid fa-lock"></i> SYSTEM LOCKED';
-            
-            this.lockoutTimer = setInterval(() => {
-                timeRemaining -= 1000;
-                
-                if (timeRemaining <= 0) {
-                    clearInterval(this.lockoutTimer);
-                    this.isLocked = false;
-                    
-                    loginButton.disabled = false;
-                    loginButton.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> LOGIN TO LAVMIS';
-                    
-                    errorElement.textContent = '';
-                    this.remainingAttempts = this.maxAttempts;
-                    this.updateAttemptsDisplay();
-                }
-            }, 1000);
-        }
-        
-        updateAttemptsDisplay() {
-            const attemptsElement = document.getElementById('loginAttempts');
-            
-            if (this.isLocked) {
-                attemptsElement.style.display = 'none';
-            } else {
-                attemptsElement.style.display = 'block';
-                attemptsElement.textContent = `Attempts remaining: ${this.remainingAttempts}`;
-                
-                if (this.remainingAttempts <= 2) {
-                    attemptsElement.style.color = '#e74c3c';
-                    attemptsElement.style.fontWeight = 'bold';
-                } else if (this.remainingAttempts <= 3) {
-                    attemptsElement.style.color = '#f39c12';
-                } else {
-                    attemptsElement.style.color = '#f39c12';
-                }
-            }
-        }
-        
-        loginSuccess(email, fromSession = false) {
-            this.remainingAttempts = this.maxAttempts;
-            
-            this.showMainApp(email);
-            
-            if (!fromSession) {
-                addLogEntry(`User "${email}" logged in successfully`, "success");
-            }
-        }
-        
-        showMainApp(email) {
-            document.getElementById('loginModal').style.display = 'none';
-            
-            document.getElementById('mainContent').style.display = 'flex';
-            
-            document.getElementById('loggedInUser').textContent = email;
-            
-            isUserAuthenticated = true;
-            
-            const netLabel = document.getElementById('net-label');
-            if (netLabel) {
-                netLabel.textContent = 'ONLINE';
-                netLabel.className = 'indicator on';
-            }
-            
-            if (currentFirebaseUser) {
-                document.getElementById('firebaseStatusPanel').style.display = 'block';
-                document.getElementById('firebase-status-ind').style.display = 'inline-flex';
-                updateFirebaseStatus('online', 'Logged in as ' + email);
-            }
-            
-            initializeApp();
-        }
-        
-        initiateLogout() {
-            if (confirm("Are you sure you want to logout?")) {
-                if (firebaseAuth) {
-                    firebaseAuth.signOut();
-                }
-                stopFeedbackListener();
-                const email = document.getElementById('loggedInUser').textContent;
-                addLogEntry(`User "${email}" logged out`, "info");
-                resetAppState();
-                document.getElementById('loginModal').style.display = 'flex';
-                document.getElementById('mainContent').style.display = 'none';
-                document.getElementById('username').value = '';
-                document.getElementById('password').value = '';
-                document.getElementById('loginError').textContent = '';
-            }
-        }
-    }
-
-    function attemptLogin() {
-        if (loginSystem) {
-            loginSystem.attemptFirebaseLogin();
-        }
-    }
-
-    function initiateLogout() {
-        if (loginSystem) {
-            loginSystem.initiateLogout();
-        }
-    }
-
-    // ==========================================
     // APPLICATION INITIALIZATION
     // ==========================================
     function initializeApp() {
@@ -4081,16 +3083,6 @@
         
         isSystemReady = true;
         console.log("✅ System fully initialized and ready");
-        
-        if (isUserAuthenticated && currentFirebaseUser) {
-            console.log("Starting deferred Firebase operations...");
-            setTimeout(async () => {
-                setupRealtimeListener();
-                await processSyncQueue();
-                await syncFromFirebase();
-                startPeriodicSync();
-            }, 1000);
-        }
         
         addLogEntry("LAVMIS Pro application started", "success");
         refreshRevisionDrawer();
@@ -4201,8 +3193,6 @@
         
         currentFirebaseUser = null;
         firebaseRealtimeListener = null;
-        stopFeedbackListener();
-        stopPeriodicSync();
         
         isSystemReady = false;
         isMapReady = false;
@@ -4297,14 +3287,18 @@
         const saveBtn = document.getElementById('saveBtn');
         
         if (isEditingRevision && originalCoordinates) {
-            accuracyText.textContent = originalCoordinates.accuracy ? `${originalCoordinates.accuracy} m (Old)` : 'Retained';
-            accuracyFill.style.width = '100%';
-            accuracyFill.style.background = '#3498db';
-            gpsIcon.className = 'fa-solid fa-clock-rotate-left';
-            statusText.textContent = 'Revision Mode Active';
-            statusDetail.textContent = 'Original coordinates retained';
-            saveBtn.disabled = false;
-            saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> SUBMIT REVISION';
+            if (accuracyText) accuracyText.textContent = originalCoordinates.accuracy ? `${originalCoordinates.accuracy} m (Old)` : 'Retained';
+            if (accuracyFill) {
+                accuracyFill.style.width = '100%';
+                accuracyFill.style.background = '#3498db';
+            }
+            if (gpsIcon) gpsIcon.className = 'fa-solid fa-clock-rotate-left';
+            if (statusText) statusText.textContent = 'Revision Mode Active';
+            if (statusDetail) statusDetail.textContent = 'Original coordinates retained';
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> SUBMIT REVISION';
+            }
             
             const revisionInd = document.getElementById('revision-status-ind');
             if (revisionInd) {
@@ -4320,17 +3314,19 @@
         }
         
         if (accuracy === null) {
-            accuracyText.textContent = '-- m';
-            accuracyFill.style.width = '0%';
-            accuracyFill.style.background = '#e74c3c';
-            gpsIcon.className = 'fa-solid fa-satellite-slash';
-            statusText.textContent = 'GPS Not Available';
-            statusDetail.textContent = 'Waiting for GPS signal...';
-            saveBtn.disabled = true;
+            if (accuracyText) accuracyText.textContent = '-- m';
+            if (accuracyFill) {
+                accuracyFill.style.width = '0%';
+                accuracyFill.style.background = '#e74c3c';
+            }
+            if (gpsIcon) gpsIcon.className = 'fa-solid fa-satellite-slash';
+            if (statusText) statusText.textContent = 'GPS Not Available';
+            if (statusDetail) statusDetail.textContent = 'Waiting for GPS signal...';
+            if (saveBtn) saveBtn.disabled = true;
             return;
         }
         
-        accuracyText.textContent = `${accuracy.toFixed(1)} m`;
+        if (accuracyText) accuracyText.textContent = `${accuracy.toFixed(1)} m`;
         
         let accuracyPercent;
         if (accuracy <= 3) {
@@ -4341,36 +3337,44 @@
             accuracyPercent = Math.max(0, 100 - ((accuracy - 3) / 47 * 100));
         }
         
-        accuracyFill.style.width = `${accuracyPercent}%`;
+        if (accuracyFill) accuracyFill.style.width = `${accuracyPercent}%`;
         
         if (accuracy >= 3 && accuracy <= 20) {
-            accuracyFill.style.background = '#27ae60';
-            gpsIcon.className = 'fa-solid fa-satellite';
-            statusText.textContent = 'GPS Ready';
-            statusDetail.textContent = 'Good accuracy for data collection';
-            saveBtn.disabled = false;
-            saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> SAVE PROPERTY RECORD';
+            if (accuracyFill) accuracyFill.style.background = '#27ae60';
+            if (gpsIcon) gpsIcon.className = 'fa-solid fa-satellite';
+            if (statusText) statusText.textContent = 'GPS Ready';
+            if (statusDetail) statusDetail.textContent = 'Good accuracy for data collection';
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> SAVE PROPERTY RECORD';
+            }
         } else if (accuracy < 3) {
-            accuracyFill.style.background = '#f39c12';
-            gpsIcon.className = 'fa-solid fa-satellite';
-            statusText.textContent = 'High Accuracy';
-            statusDetail.textContent = 'Accuracy too high (possible mock location)';
-            saveBtn.disabled = true;
-            saveBtn.innerHTML = '<i class="fa-solid fa-exclamation-triangle"></i> Accuracy Too High';
+            if (accuracyFill) accuracyFill.style.background = '#f39c12';
+            if (gpsIcon) gpsIcon.className = 'fa-solid fa-satellite';
+            if (statusText) statusText.textContent = 'High Accuracy';
+            if (statusDetail) statusDetail.textContent = 'Accuracy too high (possible mock location)';
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="fa-solid fa-exclamation-triangle"></i> Accuracy Too High';
+            }
         } else if (accuracy <= 30) {
-            accuracyFill.style.background = '#f39c12';
-            gpsIcon.className = 'fa-solid fa-satellite';
-            statusText.textContent = 'Moderate Accuracy';
-            statusDetail.textContent = 'Move for better GPS signal';
-            saveBtn.disabled = true;
-            saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> WAIT FOR BETTER GPS';
+            if (accuracyFill) accuracyFill.style.background = '#f39c12';
+            if (gpsIcon) gpsIcon.className = 'fa-solid fa-satellite';
+            if (statusText) statusText.textContent = 'Moderate Accuracy';
+            if (statusDetail) statusDetail.textContent = 'Move for better GPS signal';
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> WAIT FOR BETTER GPS';
+            }
         } else {
-            accuracyFill.style.background = '#e74c3c';
-            gpsIcon.className = 'fa-solid fa-satellite';
-            statusText.textContent = 'Poor Accuracy';
-            statusDetail.textContent = 'Move to open area for better GPS';
-            saveBtn.disabled = true;
-            saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> NEED BETTER GPS';
+            if (accuracyFill) accuracyFill.style.background = '#e74c3c';
+            if (gpsIcon) gpsIcon.className = 'fa-solid fa-satellite';
+            if (statusText) statusText.textContent = 'Poor Accuracy';
+            if (statusDetail) statusDetail.textContent = 'Move to open area for better GPS';
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> NEED BETTER GPS';
+            }
         }
         
         if (position) {
@@ -4379,7 +3383,7 @@
     }
     
     function updateAccuracyCircle(position, accuracy) {
-        accuracyLayer.clearLayers();
+        if (accuracyLayer) accuracyLayer.clearLayers();
         
         if (accuracy && accuracy <= 100) {
             const circle = L.circle(position, {
@@ -4407,7 +3411,7 @@
         const toggleBtn = document.getElementById('autoCenterToggle');
         
         if (isAutoCentering) {
-            toggleBtn.classList.add('active');
+            if (toggleBtn) toggleBtn.classList.add('active');
             toggleBtn.title = 'Auto-center ON - Click to disable';
             addLogEntry("Auto-center enabled", "info");
             
@@ -4415,7 +3419,7 @@
                 map.setView(currentPos, Math.max(map.getZoom(), 16));
             }
         } else {
-            toggleBtn.classList.remove('active');
+            if (toggleBtn) toggleBtn.classList.remove('active');
             toggleBtn.title = 'Auto-center OFF - Click to enable';
             addLogEntry("Auto-center disabled", "info");
         }
@@ -4427,8 +3431,10 @@
     function setLocationMode(mode) {
         locationMode = mode;
         
-        document.getElementById('gpsToggle').classList.toggle('active', mode === 'gps');
-        document.getElementById('manualToggle').classList.toggle('active', mode === 'manual');
+        const gpsToggle = document.getElementById('gpsToggle');
+        const manualToggle = document.getElementById('manualToggle');
+        if (gpsToggle) gpsToggle.classList.toggle('active', mode === 'gps');
+        if (manualToggle) manualToggle.classList.toggle('active', mode === 'manual');
         
         if (isEditingRevision && originalCoordinates) {
             updateCoordinatesDisplay(
@@ -4442,19 +3448,19 @@
         
         const saveBtn = document.getElementById('saveBtn');
         if (mode === 'manual') {
-            saveBtn.disabled = !manualPos;
-            saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> SAVE PROPERTY RECORD';
+            if (saveBtn) saveBtn.disabled = !manualPos;
+            if (saveBtn) saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> SAVE PROPERTY RECORD';
             addLogEntry("Switched to manual point selection mode", "info");
         } else {
-            saveBtn.disabled = !(currentAccuracy && currentAccuracy >= 3 && currentAccuracy <= 20);
-            if (!saveBtn.disabled) {
+            if (saveBtn) saveBtn.disabled = !(currentAccuracy && currentAccuracy >= 3 && currentAccuracy <= 20);
+            if (saveBtn && !saveBtn.disabled) {
                 saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> SAVE PROPERTY RECORD';
             }
             addLogEntry("Switched to GPS auto mode", "info");
         }
         
         if (mode === 'manual') {
-            accuracyLayer.clearLayers();
+            if (accuracyLayer) accuracyLayer.clearLayers();
         }
         
         if (mode === 'gps' && currentPos && !isEditingRevision) {
@@ -4465,15 +3471,18 @@
             updateCoordinatesDisplay(null, null, 'Click on map to select a point');
         }
         
-        document.getElementById('map').style.cursor = mode === 'manual' ? 'crosshair' : 'default';
+        const mapElement = document.getElementById('map');
+        if (mapElement) mapElement.style.cursor = mode === 'manual' ? 'crosshair' : 'default';
     }
     
     function clearManualPoint() {
         manualPos = null;
         manualMarker = null;
-        manualLayer.clearLayers();
-        document.getElementById('clearPointBtn').disabled = true;
-        document.getElementById('saveBtn').disabled = true;
+        if (manualLayer) manualLayer.clearLayers();
+        const clearBtn = document.getElementById('clearPointBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        if (clearBtn) clearBtn.disabled = true;
+        if (saveBtn) saveBtn.disabled = true;
         updateCoordinatesDisplay(null, null, 'Click on map to select a point');
         addLogEntry("Manual point cleared", "info");
     }
@@ -4481,26 +3490,28 @@
     function updateCoordinatesDisplay(lat, lng, source, accuracy = null) {
         const coordDisplay = document.getElementById('coordinates');
         
-        if (lat !== null && lng !== null) {
-            let html = `<div style="font-weight: 600; color: var(--primary);"><i class="fa-solid fa-map-pin"></i> ${source}</div>
-                <div style="color: #27ae60; font-weight: bold; margin-top: 6px; font-size: 0.9rem;">
-                    ${lat.toFixed(6)}, ${lng.toFixed(6)}
-                </div>`;
-            
-            if (accuracy !== null) {
-                html += `<div style="font-size: 0.75rem; color: ${getAccuracyColor(accuracy)}; margin-top: 4px; font-weight: 500;">
-                    Accuracy: ${accuracy.toFixed(1)}m
-                </div>`;
+        if (coordDisplay) {
+            if (lat !== null && lng !== null) {
+                let html = `<div style="font-weight: 600; color: var(--primary);"><i class="fa-solid fa-map-pin"></i> ${source}</div>
+                    <div style="color: #27ae60; font-weight: bold; margin-top: 6px; font-size: 0.9rem;">
+                        ${lat.toFixed(6)}, ${lng.toFixed(6)}
+                    </div>`;
+                
+                if (accuracy !== null) {
+                    html += `<div style="font-size: 0.75rem; color: ${getAccuracyColor(accuracy)}; margin-top: 4px; font-weight: 500;">
+                        Accuracy: ${accuracy.toFixed(1)}m
+                    </div>`;
+                }
+                
+                coordDisplay.innerHTML = html;
+            } else {
+                coordDisplay.innerHTML = `
+                    <div style="font-weight: 600; color: var(--primary);"><i class="fa-solid fa-info-circle"></i> ${source || 'Waiting for location...'}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 6px;">
+                        ${locationMode === 'gps' ? 'Waiting for GPS signal' : 'Click on map to select a point'}
+                    </div>
+                `;
             }
-            
-            coordDisplay.innerHTML = html;
-        } else {
-            coordDisplay.innerHTML = `
-                <div style="font-weight: 600; color: var(--primary);"><i class="fa-solid fa-info-circle"></i> ${source || 'Waiting for location...'}</div>
-                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 6px;">
-                    ${locationMode === 'gps' ? 'Waiting for GPS signal' : 'Click on map to select a point'}
-                </div>
-            `;
         }
     }
     
@@ -4520,21 +3531,28 @@
         const parishSelect = document.getElementById('parish');
         const villageSelect = document.getElementById('village');
         
-        districtSelect.innerHTML = '<option value="">Select District/City</option>';
-        subcountySelect.innerHTML = '<option value="">Select Subcounty</option>';
-        parishSelect.innerHTML = '<option value="">Select Parish</option>';
-        villageSelect.innerHTML = '<option value="">Select Village</option>';
+        if (districtSelect) {
+            districtSelect.innerHTML = '<option value="">Select District/City</option>';
+            districts.forEach(district => {
+                const option = document.createElement('option');
+                option.value = district;
+                option.textContent = district;
+                districtSelect.appendChild(option);
+            });
+        }
         
-        districts.forEach(district => {
-            const option = document.createElement('option');
-            option.value = district;
-            option.textContent = district;
-            districtSelect.appendChild(option);
-        });
-        
-        subcountySelect.disabled = true;
-        parishSelect.disabled = true;
-        villageSelect.disabled = true;
+        if (subcountySelect) {
+            subcountySelect.innerHTML = '<option value="">Select Subcounty</option>';
+            subcountySelect.disabled = true;
+        }
+        if (parishSelect) {
+            parishSelect.innerHTML = '<option value="">Select Parish</option>';
+            parishSelect.disabled = true;
+        }
+        if (villageSelect) {
+            villageSelect.innerHTML = '<option value="">Select Village</option>';
+            villageSelect.disabled = true;
+        }
     }
     
     function getSubcountiesForDistrict(district) {
@@ -4566,16 +3584,18 @@
         const parishSelect = document.getElementById('parish');
         const villageSelect = document.getElementById('village');
         
+        if (!districtSelect || !subcountySelect) return;
+        
         const selectedDistrict = districtSelect.value;
         
         if (!selectedDistrict) {
             subcountySelect.disabled = true;
-            parishSelect.disabled = true;
-            villageSelect.disabled = true;
+            if (parishSelect) parishSelect.disabled = true;
+            if (villageSelect) villageSelect.disabled = true;
             
             subcountySelect.innerHTML = '<option value="">Select Subcounty</option>';
-            parishSelect.innerHTML = '<option value="">Select Parish</option>';
-            villageSelect.innerHTML = '<option value="">Select Village</option>';
+            if (parishSelect) parishSelect.innerHTML = '<option value="">Select Parish</option>';
+            if (villageSelect) villageSelect.innerHTML = '<option value="">Select Village</option>';
             return;
         }
         
@@ -4591,10 +3611,14 @@
             subcountySelect.appendChild(option);
         });
         
-        parishSelect.disabled = true;
-        villageSelect.disabled = true;
-        parishSelect.innerHTML = '<option value="">Select Parish</option>';
-        villageSelect.innerHTML = '<option value="">Select Village</option>';
+        if (parishSelect) {
+            parishSelect.disabled = true;
+            parishSelect.innerHTML = '<option value="">Select Parish</option>';
+        }
+        if (villageSelect) {
+            villageSelect.disabled = true;
+            villageSelect.innerHTML = '<option value="">Select Village</option>';
+        }
     }
     
     function updateParishes() {
@@ -4603,15 +3627,17 @@
         const parishSelect = document.getElementById('parish');
         const villageSelect = document.getElementById('village');
         
+        if (!districtSelect || !subcountySelect || !parishSelect) return;
+        
         const selectedDistrict = districtSelect.value;
         const selectedSubcounty = subcountySelect.value;
         
         if (!selectedDistrict || !selectedSubcounty) {
             parishSelect.disabled = true;
-            villageSelect.disabled = true;
+            if (villageSelect) villageSelect.disabled = true;
             
             parishSelect.innerHTML = '<option value="">Select Parish</option>';
-            villageSelect.innerHTML = '<option value="">Select Village</option>';
+            if (villageSelect) villageSelect.innerHTML = '<option value="">Select Village</option>';
             return;
         }
         
@@ -4627,8 +3653,10 @@
             parishSelect.appendChild(option);
         });
         
-        villageSelect.disabled = true;
-        villageSelect.innerHTML = '<option value="">Select Village</option>';
+        if (villageSelect) {
+            villageSelect.disabled = true;
+            villageSelect.innerHTML = '<option value="">Select Village</option>';
+        }
     }
     
     function updateVillages() {
@@ -4636,6 +3664,8 @@
         const subcountySelect = document.getElementById('subcounty');
         const parishSelect = document.getElementById('parish');
         const villageSelect = document.getElementById('village');
+        
+        if (!districtSelect || !subcountySelect || !parishSelect || !villageSelect) return;
         
         const selectedDistrict = districtSelect.value;
         const selectedSubcounty = subcountySelect.value;
@@ -4661,10 +3691,9 @@
     }
 
     // ==========================================
-    // TOGGLE MANUAL ENTRY (Universal)
+    // TOGGLE MANUAL ENTRY
     // ==========================================
     function toggleManualEntry(fieldType) {
-        // fieldType can be: districtCity, subcounty, parish, village, transactionYear, transactionType, dataSource
         const selectElement = document.getElementById(fieldType);
         const manualInput = document.getElementById(fieldType + 'Manual');
         
@@ -4677,7 +3706,6 @@
             
             manualInput.value = '';
             
-            // Handle cascading updates for location fields
             if (fieldType === 'districtCity') {
                 updateSubcounties();
             } else if (fieldType === 'subcounty') {
@@ -4692,22 +3720,39 @@
             
             selectElement.value = '';
             
-            // Disable dependent selects if location field
             if (fieldType === 'districtCity') {
-                document.getElementById('subcounty').disabled = true;
-                document.getElementById('subcounty').value = '';
-                document.getElementById('parish').disabled = true;
-                document.getElementById('parish').value = '';
-                document.getElementById('village').disabled = true;
-                document.getElementById('village').value = '';
+                const subcountySelect = document.getElementById('subcounty');
+                const parishSelect = document.getElementById('parish');
+                const villageSelect = document.getElementById('village');
+                if (subcountySelect) {
+                    subcountySelect.disabled = true;
+                    subcountySelect.value = '';
+                }
+                if (parishSelect) {
+                    parishSelect.disabled = true;
+                    parishSelect.value = '';
+                }
+                if (villageSelect) {
+                    villageSelect.disabled = true;
+                    villageSelect.value = '';
+                }
             } else if (fieldType === 'subcounty') {
-                document.getElementById('parish').disabled = true;
-                document.getElementById('parish').value = '';
-                document.getElementById('village').disabled = true;
-                document.getElementById('village').value = '';
+                const parishSelect = document.getElementById('parish');
+                const villageSelect = document.getElementById('village');
+                if (parishSelect) {
+                    parishSelect.disabled = true;
+                    parishSelect.value = '';
+                }
+                if (villageSelect) {
+                    villageSelect.disabled = true;
+                    villageSelect.value = '';
+                }
             } else if (fieldType === 'parish') {
-                document.getElementById('village').disabled = true;
-                document.getElementById('village').value = '';
+                const villageSelect = document.getElementById('village');
+                if (villageSelect) {
+                    villageSelect.disabled = true;
+                    villageSelect.value = '';
+                }
             }
         }
     }
@@ -4716,22 +3761,23 @@
     // UNIT CONVERSION FUNCTIONS
     // ==========================================
     function convertToHectares() {
-        const landArea = parseFloat(document.getElementById('landArea').value);
-        const unit = document.getElementById('areaUnit').value;
+        const landArea = parseFloat(document.getElementById('landArea')?.value);
+        const unit = document.getElementById('areaUnit')?.value;
+        const sizeInput = document.getElementById('size');
         
-        if (!landArea || !unit) {
-            document.getElementById('size').value = '';
+        if (!landArea || !unit || !sizeInput) {
+            if (sizeInput) sizeInput.value = '';
             return;
         }
         
         const conversionFactor = CONVERSION_FACTORS[unit];
         if (!conversionFactor) {
-            document.getElementById('size').value = '';
+            sizeInput.value = '';
             return;
         }
         
         const hectares = landArea * conversionFactor;
-        document.getElementById('size').value = hectares.toFixed(4);
+        sizeInput.value = hectares.toFixed(4);
         
         addLogEntry(`Converted ${landArea} ${unit} to ${hectares.toFixed(4)} Ha`, 'info');
     }
@@ -4744,27 +3790,29 @@
     function setRegistrationType(type) {
         registrationType = type;
         
-        document.getElementById('titledToggle').classList.toggle('active', type === 'titled');
-        document.getElementById('untitledToggle').classList.toggle('active', type === 'untitled');
+        const titledToggle = document.getElementById('titledToggle');
+        const untitledToggle = document.getElementById('untitledToggle');
+        if (titledToggle) titledToggle.classList.toggle('active', type === 'titled');
+        if (untitledToggle) untitledToggle.classList.toggle('active', type === 'untitled');
         
         const titleFields = document.getElementById('titleFields');
         const plotNumberInput = document.getElementById('plotNumber');
         const blockNumberInput = document.getElementById('blockNumber');
         
         if (type === 'titled') {
-            titleFields.style.display = 'grid';
-            plotNumberInput.disabled = false;
-            blockNumberInput.disabled = false;
-            plotNumberInput.required = true;
-            blockNumberInput.required = true;
+            if (titleFields) titleFields.style.display = 'grid';
+            if (plotNumberInput) plotNumberInput.disabled = false;
+            if (blockNumberInput) blockNumberInput.disabled = false;
+            if (plotNumberInput) plotNumberInput.required = true;
+            if (blockNumberInput) blockNumberInput.required = true;
         } else {
-            titleFields.style.display = 'none';
-            plotNumberInput.disabled = true;
-            blockNumberInput.disabled = true;
-            plotNumberInput.required = false;
-            blockNumberInput.required = false;
-            plotNumberInput.value = '';
-            blockNumberInput.value = '';
+            if (titleFields) titleFields.style.display = 'none';
+            if (plotNumberInput) plotNumberInput.disabled = true;
+            if (blockNumberInput) blockNumberInput.disabled = true;
+            if (plotNumberInput) plotNumberInput.required = false;
+            if (blockNumberInput) blockNumberInput.required = false;
+            if (plotNumberInput) plotNumberInput.value = '';
+            if (blockNumberInput) blockNumberInput.value = '';
         }
         
         addLogEntry(`Registration type set to: ${type}`, "info");
@@ -4809,7 +3857,7 @@
     // EVIDENCE PHOTO HANDLING
     // ==========================================
     function capturePhoto() {
-        document.getElementById('photoInput').click();
+        document.getElementById('photoInput')?.click();
     }
     
     function handlePhotoUpload(event) {
@@ -4848,9 +3896,13 @@
 
                 evidencePhoto = canvas.toDataURL('image/jpeg', QUALITY);
 
-                document.getElementById('imagePreview').src = evidencePhoto;
-                document.getElementById('imagePreview').style.display = 'block';
-                document.getElementById('removePhotoBtn').style.display = 'block';
+                const previewImg = document.getElementById('imagePreview');
+                const removeBtn = document.getElementById('removePhotoBtn');
+                if (previewImg) {
+                    previewImg.src = evidencePhoto;
+                    previewImg.style.display = 'block';
+                }
+                if (removeBtn) removeBtn.style.display = 'block';
                 
                 const originalSize = Math.round(file.size / 1024);
                 const compressedSize = Math.round((evidencePhoto.length * 3 / 4) / 1024);
@@ -4864,13 +3916,16 @@
     
     function removePhoto() {
         evidencePhoto = null;
-        document.getElementById('imagePreview').style.display = 'none';
-        document.getElementById('removePhotoBtn').style.display = 'none';
-        document.getElementById('photoInput').value = '';
+        const previewImg = document.getElementById('imagePreview');
+        const removeBtn = document.getElementById('removePhotoBtn');
+        const photoInput = document.getElementById('photoInput');
+        if (previewImg) previewImg.style.display = 'none';
+        if (removeBtn) removeBtn.style.display = 'none';
+        if (photoInput) photoInput.value = '';
         addLogEntry("Evidence photo removed", "info");
     }
 
-    // NEW: Sales Agreement upload handling
+    // Sales Agreement upload handling
     function handleSalesAgreementUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -4883,31 +3938,32 @@
             salesAgreementData = e.target.result;
             salesAgreementName = file.name;
             const previewDiv = document.getElementById('salesAgreementPreview');
-            previewDiv.innerHTML = `<a href="#" class="file-attachment-link" onclick="window.open(salesAgreementData, '_blank')"><i class="fa-solid fa-file-pdf"></i> ${salesAgreementName}</a>`;
-            document.getElementById('removeAgreementBtn').style.display = 'block';
+            if (previewDiv) {
+                previewDiv.innerHTML = `<a href="#" class="file-attachment-link" onclick="window.open(salesAgreementData, '_blank')"><i class="fa-solid fa-file-pdf"></i> ${salesAgreementName}</a>`;
+            }
+            const removeBtn = document.getElementById('removeAgreementBtn');
+            if (removeBtn) removeBtn.style.display = 'block';
             addLogEntry(`Sales agreement "${salesAgreementName}" attached`, "success");
         };
         reader.readAsDataURL(file);
     }
+    
     function removeSalesAgreement() {
         salesAgreementData = null;
         salesAgreementName = null;
-        document.getElementById('salesAgreementPreview').innerHTML = '';
-        document.getElementById('removeAgreementBtn').style.display = 'none';
-        document.getElementById('salesAgreementInput').value = '';
+        const previewDiv = document.getElementById('salesAgreementPreview');
+        const removeBtn = document.getElementById('removeAgreementBtn');
+        const agreementInput = document.getElementById('salesAgreementInput');
+        if (previewDiv) previewDiv.innerHTML = '';
+        if (removeBtn) removeBtn.style.display = 'none';
+        if (agreementInput) agreementInput.value = '';
         addLogEntry("Sales agreement removed", "info");
     }
 
     // ==========================================
-    // DATA SAVING FUNCTION - UPDATED WITH NEW FIELDS & SALES AGREEMENT
+    // DATA SAVING FUNCTION
     // ==========================================
     async function saveData() {
-        let activeUser = currentFirebaseUser;
-        if (!activeUser && firebase.auth && firebase.auth().currentUser) {
-            activeUser = firebase.auth().currentUser;
-            currentFirebaseUser = activeUser;
-        }
-        
         let position;
         let positionSource;
         let accuracy = null;
@@ -4941,70 +3997,55 @@
             }
         }
 
-        const propertyId = document.getElementById('propertyId').value.trim();
-        const propertyName = document.getElementById('propertyName').value.trim();
-        const plotNumber = document.getElementById('plotNumber').value.trim();
-        const blockNumber = document.getElementById('blockNumber').value.trim();
+        const propertyId = document.getElementById('propertyId')?.value.trim();
+        const propertyName = document.getElementById('propertyName')?.value.trim();
+        const plotNumber = document.getElementById('plotNumber')?.value.trim();
+        const blockNumber = document.getElementById('blockNumber')?.value.trim();
         
-        const districtCity = document.getElementById('districtCityManual').style.display === 'block' 
-            ? document.getElementById('districtCityManual').value.trim()
-            : document.getElementById('districtCity').value.trim();
+        const districtCity = document.getElementById('districtCityManual')?.style.display === 'block' 
+            ? document.getElementById('districtCityManual')?.value.trim()
+            : document.getElementById('districtCity')?.value.trim();
         
-        const subcounty = document.getElementById('subcountyManual').style.display === 'block'
-            ? document.getElementById('subcountyManual').value.trim()
-            : document.getElementById('subcounty').value.trim();
+        const subcounty = document.getElementById('subcountyManual')?.style.display === 'block'
+            ? document.getElementById('subcountyManual')?.value.trim()
+            : document.getElementById('subcounty')?.value.trim();
         
-        const parish = document.getElementById('parishManual').style.display === 'block'
-            ? document.getElementById('parishManual').value.trim()
-            : document.getElementById('parish').value.trim();
+        const parish = document.getElementById('parishManual')?.style.display === 'block'
+            ? document.getElementById('parishManual')?.value.trim()
+            : document.getElementById('parish')?.value.trim();
         
-        const village = document.getElementById('villageManual').style.display === 'block'
-            ? document.getElementById('villageManual').value.trim()
-            : document.getElementById('village').value.trim();
+        const village = document.getElementById('villageManual')?.style.display === 'block'
+            ? document.getElementById('villageManual')?.value.trim()
+            : document.getElementById('village')?.value.trim();
         
-        const description = document.getElementById('description').value.trim();
+        const description = document.getElementById('description')?.value.trim();
         
-        // Transaction Year
-        const transactionYear = document.getElementById('transactionYearManual').style.display === 'block'
-            ? document.getElementById('transactionYearManual').value.trim()
-            : document.getElementById('transactionYear').value;
+        const transactionYear = document.getElementById('transactionYearManual')?.style.display === 'block'
+            ? document.getElementById('transactionYearManual')?.value.trim()
+            : document.getElementById('transactionYear')?.value;
         
-        // Land Area and Unit
-        const landArea = parseFloat(document.getElementById('landArea').value);
-        const areaUnit = document.getElementById('areaUnit').value;
-        const size = parseFloat(document.getElementById('size').value);
+        const landArea = parseFloat(document.getElementById('landArea')?.value);
+        const areaUnit = document.getElementById('areaUnit')?.value;
+        const size = parseFloat(document.getElementById('size')?.value);
         
-        // Transaction Type
-        const transactionType = document.getElementById('transactionTypeManual').style.display === 'block'
-            ? document.getElementById('transactionTypeManual').value.trim()
-            : document.getElementById('transactionType').value;
+        const transactionType = document.getElementById('transactionTypeManual')?.style.display === 'block'
+            ? document.getElementById('transactionTypeManual')?.value.trim()
+            : document.getElementById('transactionType')?.value;
         
-        // Land Value Type
-        const landValueType = document.getElementById('landValueType').value;
+        const landValueType = document.getElementById('landValueType')?.value;
+        const roadAccess = document.getElementById('roadAccess')?.value;
+        const neighborhoodClass = document.getElementById('neighborhoodClass')?.value;
+        const terrain = document.getElementById('terrain')?.value;
+        const electricityAccess = document.getElementById('electricityAccess')?.value;
+        const waterAccess = document.getElementById('waterAccess')?.value;
         
-        // Road Access
-        const roadAccess = document.getElementById('roadAccess').value;
+        const dataSource = document.getElementById('dataSourceManual')?.style.display === 'block'
+            ? document.getElementById('dataSourceManual')?.value.trim()
+            : document.getElementById('dataSource')?.value;
         
-        // Neighborhood Class
-        const neighborhoodClass = document.getElementById('neighborhoodClass').value;
-        
-        // Terrain
-        const terrain = document.getElementById('terrain').value;
-        
-        // NEW: Electricity Access
-        const electricityAccess = document.getElementById('electricityAccess').value;
-        
-        // NEW: Water Access
-        const waterAccess = document.getElementById('waterAccess').value;
-        
-        // Data Source
-        const dataSource = document.getElementById('dataSourceManual').style.display === 'block'
-            ? document.getElementById('dataSourceManual').value.trim()
-            : document.getElementById('dataSource').value;
-        
-        const price = parseFloat(document.getElementById('price').value);
-        const landUse = document.getElementById('use').value;
-        const officerName = document.getElementById('officerName').value.trim();
+        const price = parseFloat(document.getElementById('price')?.value);
+        const landUse = document.getElementById('use')?.value;
+        const officerName = document.getElementById('officerName')?.value.trim();
         
         if (!propertyId) {
             alert("Please generate Property ID.");
@@ -5084,8 +4125,10 @@
         }
 
         const saveBtn = document.getElementById('saveBtn');
-        saveBtn.disabled = true;
-        saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> SAVING...';
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> SAVING...';
+        }
 
         try {
             const existingRecord = await db.getRecordByPropertyId(propertyId);
@@ -5104,8 +4147,10 @@
                     
                     await db.clearRejectionNotifications(propertyId);
                     
-                    document.getElementById('rejectionFeedback').style.display = 'none';
-                    document.getElementById('rejectionNotification').style.display = 'none';
+                    const rejectionFeedback = document.getElementById('rejectionFeedback');
+                    const rejectionNotification = document.getElementById('rejectionNotification');
+                    if (rejectionFeedback) rejectionFeedback.style.display = 'none';
+                    if (rejectionNotification) rejectionNotification.style.display = 'none';
                 } else {
                     isRevised = existingRecord.isRevised || false;
                     revisionNumber = existingRecord.revisionNumber || 1;
@@ -5116,8 +4161,10 @@
             
             if (existingRecord && existingRecord.status !== 'rejected') {
                 if (!confirm(`Property ID ${propertyId} already exists. Do you want to update it?`)) {
-                    saveBtn.disabled = false;
-                    saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> SAVE PROPERTY RECORD';
+                    if (saveBtn) {
+                        saveBtn.disabled = false;
+                        saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> SAVE PROPERTY RECORD';
+                    }
                     return;
                 }
             }
@@ -5162,8 +4209,8 @@
                 positionSource: positionSource,
                 gpsAccuracy: accuracy ? accuracy.toFixed(1) : null,
                 officerName: officerName,
-                officerEmail: activeUser ? activeUser.email : 'offline_user',
-                userId: activeUser ? activeUser.uid : 'offline_id',
+                officerEmail: 'demo@lavmis.com',
+                userId: 'demo_user',
                 
                 date: new Date().toISOString(),
                 formattedDate: new Date().toLocaleDateString('en-US', {
@@ -5178,7 +4225,7 @@
                 previousStatus: previousStatus,
                 originalSubmissionId: originalSubmissionId,
                 
-                syncStatus: activeUser ? 'pending' : 'pending',
+                syncStatus: 'pending',
                 firebaseId: existingRecord ? existingRecord.firebaseId : null,
                 
                 rejectionReason: null,
@@ -5187,7 +4234,7 @@
 
             await db.saveRecord(record);
             
-            if (activeUser) {
+            if (firebaseDb) {
                 await db.addToSyncQueue(record.id, 'sync', record);
             }
 
@@ -5203,8 +4250,8 @@
             
             await updateStorageUsage();
             
-            if (activeUser && navigator.onLine) {
-                await processSyncQueue();
+            if (firebaseDb && navigator.onLine) {
+                await syncAllToFirebase();
             }
 
             await checkNotifications();
@@ -5219,8 +4266,10 @@
             alert(`Save failed: ${error.message}`);
             addLogEntry(`Save failed: ${error.message}`, "error");
         } finally {
-            saveBtn.disabled = false;
-            saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> SAVE PROPERTY RECORD';
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> SAVE PROPERTY RECORD';
+            }
         }
     }
 
@@ -5228,56 +4277,106 @@
         isEditingRevision = false;
         originalCoordinates = null;
         
-        const officerName = document.getElementById('officerName').value;
+        const officerName = document.getElementById('officerName')?.value;
         
-        document.getElementById('propertyName').value = '';
-        document.getElementById('plotNumber').value = '';
-        document.getElementById('blockNumber').value = '';
+        const propertyName = document.getElementById('propertyName');
+        const plotNumber = document.getElementById('plotNumber');
+        const blockNumber = document.getElementById('blockNumber');
         
-        document.getElementById('districtCity').value = '';
-        document.getElementById('districtCityManual').style.display = 'none';
-        document.getElementById('districtCity').style.display = 'block';
-        document.getElementById('districtCity').disabled = false;
+        if (propertyName) propertyName.value = '';
+        if (plotNumber) plotNumber.value = '';
+        if (blockNumber) blockNumber.value = '';
         
-        document.getElementById('subcounty').value = '';
-        document.getElementById('subcountyManual').style.display = 'none';
-        document.getElementById('subcounty').style.display = 'block';
-        document.getElementById('subcounty').disabled = true;
+        const districtCity = document.getElementById('districtCity');
+        const districtCityManual = document.getElementById('districtCityManual');
+        if (districtCity) {
+            districtCity.value = '';
+            districtCity.style.display = 'block';
+            districtCity.disabled = false;
+        }
+        if (districtCityManual) districtCityManual.style.display = 'none';
         
-        document.getElementById('parish').value = '';
-        document.getElementById('parishManual').style.display = 'none';
-        document.getElementById('parish').style.display = 'block';
-        document.getElementById('parish').disabled = true;
+        const subcounty = document.getElementById('subcounty');
+        const subcountyManual = document.getElementById('subcountyManual');
+        if (subcounty) {
+            subcounty.value = '';
+            subcounty.style.display = 'block';
+            subcounty.disabled = true;
+        }
+        if (subcountyManual) subcountyManual.style.display = 'none';
         
-        document.getElementById('village').value = '';
-        document.getElementById('villageManual').style.display = 'none';
-        document.getElementById('village').style.display = 'block';
-        document.getElementById('village').disabled = true;
+        const parish = document.getElementById('parish');
+        const parishManual = document.getElementById('parishManual');
+        if (parish) {
+            parish.value = '';
+            parish.style.display = 'block';
+            parish.disabled = true;
+        }
+        if (parishManual) parishManual.style.display = 'none';
         
-        // New fields
-        document.getElementById('transactionYear').value = '';
-        document.getElementById('transactionYearManual').style.display = 'none';
-        document.getElementById('transactionYear').style.display = 'block';
-        document.getElementById('landArea').value = '';
-        document.getElementById('areaUnit').selectedIndex = 0;
-        document.getElementById('size').value = '';
-        document.getElementById('transactionType').value = '';
-        document.getElementById('transactionTypeManual').style.display = 'none';
-        document.getElementById('transactionType').style.display = 'block';
-        document.getElementById('landValueType').selectedIndex = 0;
-        document.getElementById('roadAccess').selectedIndex = 0;
-        document.getElementById('neighborhoodClass').selectedIndex = 0;
-        document.getElementById('terrain').selectedIndex = 0;
-        document.getElementById('electricityAccess').selectedIndex = 0;
-        document.getElementById('waterAccess').selectedIndex = 0;
+        const village = document.getElementById('village');
+        const villageManual = document.getElementById('villageManual');
+        if (village) {
+            village.value = '';
+            village.style.display = 'block';
+            village.disabled = true;
+        }
+        if (villageManual) villageManual.style.display = 'none';
         
-        document.getElementById('description').value = '';
-        document.getElementById('dataSource').value = '';
-        document.getElementById('dataSourceManual').style.display = 'none';
-        document.getElementById('dataSource').style.display = 'block';
-        document.getElementById('price').value = '';
-        document.getElementById('use').selectedIndex = 0;
-        document.getElementById('officerName').value = officerName;
+        const transactionYear = document.getElementById('transactionYear');
+        const transactionYearManual = document.getElementById('transactionYearManual');
+        if (transactionYear) {
+            transactionYear.value = '';
+            transactionYear.style.display = 'block';
+        }
+        if (transactionYearManual) transactionYearManual.style.display = 'none';
+        
+        const landArea = document.getElementById('landArea');
+        const areaUnit = document.getElementById('areaUnit');
+        const size = document.getElementById('size');
+        if (landArea) landArea.value = '';
+        if (areaUnit) areaUnit.selectedIndex = 0;
+        if (size) size.value = '';
+        
+        const transactionType = document.getElementById('transactionType');
+        const transactionTypeManual = document.getElementById('transactionTypeManual');
+        if (transactionType) {
+            transactionType.value = '';
+            transactionType.style.display = 'block';
+        }
+        if (transactionTypeManual) transactionTypeManual.style.display = 'none';
+        
+        const landValueType = document.getElementById('landValueType');
+        const roadAccess = document.getElementById('roadAccess');
+        const neighborhoodClass = document.getElementById('neighborhoodClass');
+        const terrain = document.getElementById('terrain');
+        const electricityAccess = document.getElementById('electricityAccess');
+        const waterAccess = document.getElementById('waterAccess');
+        
+        if (landValueType) landValueType.selectedIndex = 0;
+        if (roadAccess) roadAccess.selectedIndex = 0;
+        if (neighborhoodClass) neighborhoodClass.selectedIndex = 0;
+        if (terrain) terrain.selectedIndex = 0;
+        if (electricityAccess) electricityAccess.selectedIndex = 0;
+        if (waterAccess) waterAccess.selectedIndex = 0;
+        
+        const description = document.getElementById('description');
+        const dataSource = document.getElementById('dataSource');
+        const dataSourceManual = document.getElementById('dataSourceManual');
+        const price = document.getElementById('price');
+        const use = document.getElementById('use');
+        const officerNameInput = document.getElementById('officerName');
+        
+        if (description) description.value = '';
+        if (dataSource) {
+            dataSource.value = '';
+            dataSource.style.display = 'block';
+        }
+        if (dataSourceManual) dataSourceManual.style.display = 'none';
+        if (price) price.value = '';
+        if (use) use.selectedIndex = 0;
+        if (officerNameInput) officerNameInput.value = officerName || '';
+        
         removePhoto();
         removeSalesAgreement();
         
@@ -5291,7 +4390,8 @@
     async function refreshDataDisplay() {
         const records = await db.getAllRecords();
         
-        document.getElementById('recordCount').textContent = `${records.length} records`;
+        const recordCountEl = document.getElementById('recordCount');
+        if (recordCountEl) recordCountEl.textContent = `${records.length} records`;
         
         updateTable(records);
         
@@ -5340,7 +4440,7 @@
                     <button onclick="previewRecord(${item.id})" class="action-btn" style="background:#3498db; color:white; border:none; border-radius:4px; padding:4px 8px; cursor:pointer; font-size:0.8rem;">
                         <i class="fa-solid fa-eye"></i>
                     </button>
-                 </td>
+                </td>
             `;
             
             row.addEventListener('click', (e) => {
@@ -5646,29 +4746,38 @@
         const record = await db.getRecord(id);
         if (!record) return;
 
-        document.getElementById('propertyId').value = record.propertyId;
-        document.getElementById('propertyName').value = record.propertyName || '';
-        document.getElementById('plotNumber').value = record.plotNumber || '';
-        document.getElementById('blockNumber').value = record.blockNumber || '';
+        const propertyId = document.getElementById('propertyId');
+        const propertyName = document.getElementById('propertyName');
+        const plotNumber = document.getElementById('plotNumber');
+        const blockNumber = document.getElementById('blockNumber');
+        
+        if (propertyId) propertyId.value = record.propertyId;
+        if (propertyName) propertyName.value = record.propertyName || '';
+        if (plotNumber) plotNumber.value = record.plotNumber || '';
+        if (blockNumber) blockNumber.value = record.blockNumber || '';
         
         setRegistrationType(record.registrationType || 'titled');
         
-        document.getElementById('districtCity').value = record.districtCity || '';
+        const districtCity = document.getElementById('districtCity');
+        if (districtCity) districtCity.value = record.districtCity || '';
         updateSubcounties();
         
         if (record.subcounty) {
             setTimeout(() => {
-                document.getElementById('subcounty').value = record.subcounty;
+                const subcountySelect = document.getElementById('subcounty');
+                if (subcountySelect) subcountySelect.value = record.subcounty;
                 updateParishes();
                 
                 if (record.parish) {
                     setTimeout(() => {
-                        document.getElementById('parish').value = record.parish;
+                        const parishSelect = document.getElementById('parish');
+                        if (parishSelect) parishSelect.value = record.parish;
                         updateVillages();
                         
                         if (record.village) {
                             setTimeout(() => {
-                                document.getElementById('village').value = record.village;
+                                const villageSelect = document.getElementById('village');
+                                if (villageSelect) villageSelect.value = record.village;
                             }, 100);
                         }
                     }, 100);
@@ -5676,63 +4785,97 @@
             }, 100);
         }
         
-        // Transaction Year
         if (record.transactionYear && !['2020','2021','2022','2023','2024','2025'].includes(record.transactionYear)) {
-            document.getElementById('transactionYear').style.display = 'none';
-            document.getElementById('transactionYearManual').style.display = 'block';
-            document.getElementById('transactionYearManual').value = record.transactionYear;
+            const transactionYear = document.getElementById('transactionYear');
+            const transactionYearManual = document.getElementById('transactionYearManual');
+            if (transactionYear) transactionYear.style.display = 'none';
+            if (transactionYearManual) {
+                transactionYearManual.style.display = 'block';
+                transactionYearManual.value = record.transactionYear;
+            }
         } else {
-            document.getElementById('transactionYear').value = record.transactionYear || '';
-            document.getElementById('transactionYearManual').style.display = 'none';
-            document.getElementById('transactionYear').style.display = 'block';
+            const transactionYear = document.getElementById('transactionYear');
+            const transactionYearManual = document.getElementById('transactionYearManual');
+            if (transactionYear) transactionYear.value = record.transactionYear || '';
+            if (transactionYearManual) transactionYearManual.style.display = 'none';
+            if (transactionYear) transactionYear.style.display = 'block';
         }
         
-        document.getElementById('landArea').value = record.landArea || '';
-        document.getElementById('areaUnit').value = record.areaUnit || '';
-        document.getElementById('size').value = record.size || '';
+        const landArea = document.getElementById('landArea');
+        const areaUnit = document.getElementById('areaUnit');
+        const size = document.getElementById('size');
+        if (landArea) landArea.value = record.landArea || '';
+        if (areaUnit) areaUnit.value = record.areaUnit || '';
+        if (size) size.value = record.size || '';
         
-        // Transaction Type
         const predefinedTransaction = ['Forced Sale','Market Value Basis','Distressed Sale',"Arm's Length",'Auction Sale'];
         if (record.transactionType && !predefinedTransaction.includes(record.transactionType)) {
-            document.getElementById('transactionType').style.display = 'none';
-            document.getElementById('transactionTypeManual').style.display = 'block';
-            document.getElementById('transactionTypeManual').value = record.transactionType;
+            const transactionType = document.getElementById('transactionType');
+            const transactionTypeManual = document.getElementById('transactionTypeManual');
+            if (transactionType) transactionType.style.display = 'none';
+            if (transactionTypeManual) {
+                transactionTypeManual.style.display = 'block';
+                transactionTypeManual.value = record.transactionType;
+            }
         } else {
-            document.getElementById('transactionType').value = record.transactionType || '';
-            document.getElementById('transactionTypeManual').style.display = 'none';
-            document.getElementById('transactionType').style.display = 'block';
+            const transactionType = document.getElementById('transactionType');
+            const transactionTypeManual = document.getElementById('transactionTypeManual');
+            if (transactionType) transactionType.value = record.transactionType || '';
+            if (transactionTypeManual) transactionTypeManual.style.display = 'none';
+            if (transactionType) transactionType.style.display = 'block';
         }
         
-        document.getElementById('landValueType').value = record.landValueType || '';
-        document.getElementById('roadAccess').value = record.roadAccess || '';
-        document.getElementById('neighborhoodClass').value = record.neighborhoodClass || '';
-        document.getElementById('terrain').value = record.terrain || '';
-        document.getElementById('electricityAccess').value = record.electricityAccess || '';
-        document.getElementById('waterAccess').value = record.waterAccess || '';
+        const landValueType = document.getElementById('landValueType');
+        const roadAccess = document.getElementById('roadAccess');
+        const neighborhoodClass = document.getElementById('neighborhoodClass');
+        const terrain = document.getElementById('terrain');
+        const electricityAccess = document.getElementById('electricityAccess');
+        const waterAccess = document.getElementById('waterAccess');
         
-        document.getElementById('description').value = record.description || '';
+        if (landValueType) landValueType.value = record.landValueType || '';
+        if (roadAccess) roadAccess.value = record.roadAccess || '';
+        if (neighborhoodClass) neighborhoodClass.value = record.neighborhoodClass || '';
+        if (terrain) terrain.value = record.terrain || '';
+        if (electricityAccess) electricityAccess.value = record.electricityAccess || '';
+        if (waterAccess) waterAccess.value = record.waterAccess || '';
         
-        // Data Source
+        const description = document.getElementById('description');
+        if (description) description.value = record.description || '';
+        
         const predefinedSources = ['Field Survey','Land Registry','Local Government','Property Owner','Real Estate Agent','Community Leader'];
         if (record.dataSource && !predefinedSources.includes(record.dataSource)) {
-            document.getElementById('dataSource').style.display = 'none';
-            document.getElementById('dataSourceManual').style.display = 'block';
-            document.getElementById('dataSourceManual').value = record.dataSource;
+            const dataSource = document.getElementById('dataSource');
+            const dataSourceManual = document.getElementById('dataSourceManual');
+            if (dataSource) dataSource.style.display = 'none';
+            if (dataSourceManual) {
+                dataSourceManual.style.display = 'block';
+                dataSourceManual.value = record.dataSource;
+            }
         } else {
-            document.getElementById('dataSource').value = record.dataSource || '';
-            document.getElementById('dataSourceManual').style.display = 'none';
-            document.getElementById('dataSource').style.display = 'block';
+            const dataSource = document.getElementById('dataSource');
+            const dataSourceManual = document.getElementById('dataSourceManual');
+            if (dataSource) dataSource.value = record.dataSource || '';
+            if (dataSourceManual) dataSourceManual.style.display = 'none';
+            if (dataSource) dataSource.style.display = 'block';
         }
         
-        document.getElementById('price').value = record.price || '';
-        document.getElementById('use').value = record.landUse || '';
-        document.getElementById('officerName').value = record.officerName || '';
+        const price = document.getElementById('price');
+        const use = document.getElementById('use');
+        const officerName = document.getElementById('officerName');
+        
+        if (price) price.value = record.price || '';
+        if (use) use.value = record.landUse || '';
+        if (officerName) officerName.value = record.officerName || '';
         
         if (record.photo) {
             evidencePhoto = record.photo;
-            document.getElementById('imagePreview').src = evidencePhoto;
-            document.getElementById('imagePreview').style.display = 'block';
-            document.getElementById('removePhotoBtn').style.display = 'block';
+            const previewImg = document.getElementById('imagePreview');
+            const removeBtn = document.getElementById('removePhotoBtn');
+            if (previewImg) {
+                previewImg.src = evidencePhoto;
+                previewImg.style.display = 'block';
+            }
+            if (removeBtn) removeBtn.style.display = 'block';
         } else {
             removePhoto();
         }
@@ -5740,8 +4883,12 @@
         if (record.salesAgreement) {
             salesAgreementData = record.salesAgreement;
             salesAgreementName = record.salesAgreementName || 'Sales Agreement';
-            document.getElementById('salesAgreementPreview').innerHTML = `<a href="#" class="file-attachment-link" onclick="window.open(salesAgreementData, '_blank')"><i class="fa-solid fa-file-pdf"></i> ${salesAgreementName}</a>`;
-            document.getElementById('removeAgreementBtn').style.display = 'block';
+            const previewDiv = document.getElementById('salesAgreementPreview');
+            const removeBtn = document.getElementById('removeAgreementBtn');
+            if (previewDiv) {
+                previewDiv.innerHTML = `<a href="#" class="file-attachment-link" onclick="window.open(salesAgreementData, '_blank')"><i class="fa-solid fa-file-pdf"></i> ${salesAgreementName}</a>`;
+            }
+            if (removeBtn) removeBtn.style.display = 'block';
         } else {
             removeSalesAgreement();
         }
@@ -5781,16 +4928,17 @@
             const record = await db.getRecord(id);
             await db.deleteRecord(id);
             
-            if (record.firebaseId && currentFirebaseUser) {
+            if (record.firebaseId && firebaseDb) {
                 await db.addToSyncQueue(id, 'delete', record);
             }
             
-            document.getElementById('dataPreview').style.display = 'none';
+            const previewPanel = document.getElementById('dataPreview');
+            if (previewPanel) previewPanel.style.display = 'none';
             await refreshDataDisplay();
             addLogEntry("Record deleted", "warning");
             
-            if (currentFirebaseUser && navigator.onLine) {
-                await processSyncQueue();
+            if (firebaseDb && navigator.onLine) {
+                await syncAllToFirebase();
             }
         }
     }
@@ -5883,7 +5031,7 @@
     async function performClearAll() {
         try {
             await db.clearDatabase();
-            savedLayer.clearLayers();
+            if (savedLayer) savedLayer.clearLayers();
             await refreshDataDisplay();
             addLogEntry("🔥 ALL PROPERTY DATA CLEARED - This action was intentionally confirmed by user", "error");
             await updateStorageUsage();
@@ -6079,11 +5227,13 @@
     // MODAL FUNCTIONS
     // ==========================================
     function showBackupModal() {
-        document.getElementById('backupModal').style.display = 'flex';
+        const modal = document.getElementById('backupModal');
+        if (modal) modal.style.display = 'flex';
     }
 
     function showRestoreModal() {
-        document.getElementById('restoreModal').style.display = 'flex';
+        const modal = document.getElementById('restoreModal');
+        if (modal) modal.style.display = 'flex';
     }
 
     function hideModal() {
@@ -6192,7 +5342,7 @@
     // ==========================================
     function clearAllMarkers() {
         if (confirm("Are you sure you want to remove all property markers from the map? This won't delete your saved data.")) {
-            savedLayer.clearLayers();
+            if (savedLayer) savedLayer.clearLayers();
             addLogEntry("All property markers cleared", "warning");
         }
     }
@@ -6206,15 +5356,18 @@
 
     async function loadRejectedPropertyIntoForm() {
         const modal = document.getElementById('rejectionFeedback');
-        const propertyId = document.getElementById('rejectionPropertyId').textContent;
+        const propertyId = document.getElementById('rejectionPropertyId')?.textContent;
+        
+        if (!propertyId) return;
         
         try {
             const record = await db.getRecordByPropertyId(propertyId);
             if (record) {
                 await loadRecordIntoForm(record.id);
                 
-                modal.style.display = 'none';
-                document.getElementById('rejectionNotification').style.display = 'none';
+                if (modal) modal.style.display = 'none';
+                const rejectionNotif = document.getElementById('rejectionNotification');
+                if (rejectionNotif) rejectionNotif.style.display = 'none';
                 
                 alert(`Property ${propertyId} loaded into form. Please make corrections and resubmit.`);
                 addLogEntry(`Rejected property ${propertyId} loaded into form for editing`, "info");
@@ -6228,28 +5381,51 @@
     }
 
     // ==========================================
-    // REVISION DRAWER (Properties List)
+    // REVISION DRAWER (Properties List) - FIXED
     // ==========================================
     async function refreshRevisionDrawer() {
         const drawerContent = document.getElementById('drawerContent');
+        const propertyCountSpan = document.getElementById('drawerPropertyCount');
         if (!drawerContent) return;
+        
         const records = await db.getAllRecords();
+        
+        if (propertyCountSpan) {
+            propertyCountSpan.textContent = `(${records.length})`;
+        }
+        
         if (records.length === 0) {
             drawerContent.innerHTML = '<div style="text-align: center; padding: 20px; color: #7f8c8d;">No properties recorded yet.</div>';
             return;
         }
+        
         let html = '';
         records.sort((a,b)=>new Date(b.date)-new Date(a.date)).forEach(rec => {
             let statusClass = '';
-            if (rec.status === 'rejected') statusClass = 'rejected';
-            else if (rec.status === 'approved') statusClass = 'approved';
+            let statusIcon = '';
+            if (rec.status === 'rejected') {
+                statusClass = 'rejected';
+                statusIcon = '<i class="fa-solid fa-ban" style="color: #e74c3c; margin-right: 5px;"></i>';
+            } else if (rec.status === 'approved') {
+                statusClass = 'approved';
+                statusIcon = '<i class="fa-solid fa-check-circle" style="color: #27ae60; margin-right: 5px;"></i>';
+            } else {
+                statusIcon = '<i class="fa-solid fa-clock" style="color: #f39c12; margin-right: 5px;"></i>';
+            }
+            
             html += `
                 <div class="property-drawer-item ${statusClass}" onclick="loadRecordIntoForm(${rec.id})">
                     <div class="property-drawer-info">
-                        <div class="property-drawer-title"><strong>${rec.propertyId}</strong> - ${rec.propertyName || 'Unnamed'}</div>
-                        <div class="property-drawer-sub">${rec.village}, ${rec.parish} | ${rec.formattedDate || rec.date?.slice(0,10)} | Status: ${rec.status || 'pending'}</div>
+                        <div class="property-drawer-title"><strong>${rec.propertyId}</strong> - ${rec.propertyName || 'Unnamed Property'}</div>
+                        <div class="property-drawer-sub">
+                            ${statusIcon} ${rec.status ? rec.status.toUpperCase() : 'PENDING'} | 
+                            ${rec.village || 'N/A'}, ${rec.parish || 'N/A'} | 
+                            ${rec.formattedDate ? rec.formattedDate.slice(0,10) : (rec.date ? rec.date.slice(0,10) : 'N/A')}
+                        </div>
                     </div>
-                    <button class="btn-revision-sm" onclick="event.stopPropagation(); loadRecordIntoForm(${rec.id})"><i class="fa-solid fa-pen"></i> Revise</button>
+                    <button class="btn-revision-sm" onclick="event.stopPropagation(); loadRecordIntoForm(${rec.id})">
+                        <i class="fa-solid fa-pen"></i> Edit
+                    </button>
                 </div>
             `;
         });
@@ -6259,19 +5435,35 @@
     function toggleRevisionDrawer() {
         const drawer = document.getElementById('revisionDrawer');
         const chevron = document.getElementById('drawerChevron');
-        if (drawer.classList.contains('collapsed')) {
-            drawer.classList.remove('collapsed');
-            chevron.className = 'fa-solid fa-chevron-down';
-        } else {
-            drawer.classList.add('collapsed');
-            chevron.className = 'fa-solid fa-chevron-up';
+        
+        if (drawer) {
+            if (drawer.classList.contains('collapsed')) {
+                // Expand the drawer to full bottom
+                drawer.classList.remove('collapsed');
+                drawer.classList.add('expanded');
+                if (chevron) chevron.className = 'fa-solid fa-chevron-down';
+                
+                // Refresh content when expanded
+                refreshRevisionDrawer();
+            } else {
+                // Collapse the drawer
+                drawer.classList.remove('expanded');
+                drawer.classList.add('collapsed');
+                if (chevron) chevron.className = 'fa-solid fa-chevron-up';
+            }
         }
     }
+
+    // Initialize drawer state on load
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            if (isSystemReady) refreshRevisionDrawer();
+        }, 1500);
+    });
 
     // ==========================================
     // EXPORT FUNCTIONS TO WINDOW
     // ==========================================
-    window.attemptLogin = attemptLogin;
     window.initiateLogout = initiateLogout;
     window.saveData = saveData;
     window.setRegistrationType = setRegistrationType;
@@ -6306,19 +5498,11 @@
     window.updateParishes = updateParishes;
     window.updateVillages = updateVillages;
     window.toggleManualEntry = toggleManualEntry;
-    window.markNotificationRead = markNotificationRead;
     window.deleteRecord = deleteRecord;
     window.convertToHectares = convertToHectares;
     window.toggleRevisionDrawer = toggleRevisionDrawer;
     window.handleSalesAgreementUpload = handleSalesAgreementUpload;
     window.removeSalesAgreement = removeSalesAgreement;
-
-    // Ensure drawer refresh on load
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => {
-            if (isSystemReady) refreshRevisionDrawer();
-        }, 1500);
-    });
 </script>
 </body>
 </html>
